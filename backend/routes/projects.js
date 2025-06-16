@@ -17,7 +17,7 @@ router.get('/recent', async (req, res) => {
       LEFT JOIN Project_members pm ON pm.PROJECT_ID = p.ID
       WHERE p.MANAGER_ID = ? OR pm.MEMBER_ID = ?
       GROUP BY p.ID
-      ORDER BY p.ID DESC
+      ORDER BY p.start_date DESC
       LIMIT 5
       `,
       [userId, userId]

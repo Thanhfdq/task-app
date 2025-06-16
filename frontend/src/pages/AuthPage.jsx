@@ -19,8 +19,6 @@ export default function AuthPage({ onAuthSuccess }) {
             const res = await axios.post(`/auth${endpoint}`, form, {
                 withCredentials: true
             });
-            console.log(res.data);
-            console.log(res.data.success);
             if (res.data && res.data.success) {
                 onAuthSuccess(res.data.user); // navigate to main screen
             } else {

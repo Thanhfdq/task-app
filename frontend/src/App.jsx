@@ -1,14 +1,21 @@
-import React, { useState } from "react";
-import AuthPage from "./pages/AuthPage";
-import MainScreen from "./components/MainScreen";
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import TasksPage from './pages/TaskPage.jsx';
+import AuthPage from './pages/AuthPage';
 
 function App() {
   const [user, setUser] = useState(null);
 
-  return user ? (
-    <MainScreen user={user} />
-  ) : (
-    <AuthPage onAuthSuccess={setUser} />
+  return (
+    <Router>
+      <Routes>
+        {!user ? (
+          <Route path="/*" element={<AuthPage onAuthSuccess={setUser} />} />
+        ) : (
+          <Route path="/*" element={<TasksPage user={user} />} />
+        )}
+      </Routes>
+    </Router>
   );
 }
 
