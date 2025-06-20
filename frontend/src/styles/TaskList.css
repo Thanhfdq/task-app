@@ -1,3 +1,31 @@
+.task-list-container {
+  margin-top: 20px;
+}
+
+.sort-bar {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.sort-bar button {
+  margin-left: 10px;
+  padding: 4px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+}
+
+.sort-bar button:hover {
+  background: #eee;
+}
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .task-card {
   padding: 12px;
   border: 1px solid #ddd;
@@ -33,20 +61,10 @@
   justify-content: space-between;
 }
 
-.task-progress {
-  margin-top: 8px;
-}
-
-.progress-bar {
-  background-color: #e0e0e0;
-  border-radius: 8px;
-  height: 10px;
-  width: 100%;
-  overflow: hidden;
-}
-
-.progress-fill {
-  background-color: #4caf50;
-  height: 100%;
-  transition: width 0.3s ease;
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
 }

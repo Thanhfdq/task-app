@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/sidebar.jsx';
 import Topbar from '../components/Topbar.jsx';
-import TaskItem from '../components/Taskitem.jsx';
+import TasksPage from './TasksPage.jsx';
 import axios from '../services/api.js';
-import '../styles/TaskPage.css';
+import '../styles/MainPage.css';
 
-export default function TasksPage() {
+export default function MainPage({ user }) {
   const [recentProjects, setRecentProjects] = useState([]);
-  const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
     axios.get('/projects/recent').then(res => setRecentProjects(res.data));
-    axios.get('/tasks').then(res => setTasks(res.data)).catch(err => console.error('Failed to load tasks:', err));
   }, []);
 
   return (
@@ -20,7 +18,7 @@ export default function TasksPage() {
       <div className="main">
         <Topbar />
         <main className="content">
-          {tasks.map(task => <TaskItem key={task.ID} task={task} />)}
+          <TasksPage user={user} />
         </main>
       </div>
     </div>

@@ -1,20 +1,46 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import TasksPage from './pages/TaskPage.jsx';
+import MainPage from './pages/MainPage.jsx';
 import AuthPage from './pages/AuthPage';
+import TaskModal from './components/TaskModal.jsx';
+import { UserProvider, useUser } from './contexts/UserContext.jsx';
+import { TaskModalProvider, useTaskModal } from './contexts/TaskModalContext.jsx';
 
-function App() {
-  const [user, setUser] = useState(null);
+function AppContent() {
+  const { showTaskModal } = useTaskModal();
+  const { user, setUser } = useUser();
 
   return (
-    <Router>
+    <>
       <Routes>
         {!user ? (
           <Route path="/*" element={<AuthPage onAuthSuccess={setUser} />} />
         ) : (
-          <Route path="/*" element={<TasksPage user={user} />} />
+          <Route path="/*" element={<MainPage user={user} />} />
         )}
       </Routes>
+
+      {showTaskModal && <TaskModal />}
+    </>
+  );
+}
+
+function App() {
+
+  // useEffect(() => {
+  //   const storedUser = localStorage.getItem('user');
+  //   if (storedUser) {
+  //     setUser(JSON.parse(storedUser));
+  //   }
+  // }, []);
+
+  return (
+    <Router>
+      <UserProvider>
+        <TaskModalProvider>
+          <AppContent />
+        </TaskModalProvider>
+      </UserProvider>
     </Router>
   );
 }

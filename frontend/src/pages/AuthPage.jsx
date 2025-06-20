@@ -20,6 +20,7 @@ export default function AuthPage({ onAuthSuccess }) {
                 withCredentials: true
             });
             if (res.data && res.data.success) {
+                localStorage.setItem('user', JSON.stringify(res.data.user));
                 onAuthSuccess(res.data.user); // navigate to main screen
             } else {
                 alert("Login/Register failed.");
