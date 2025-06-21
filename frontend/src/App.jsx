@@ -27,13 +27,6 @@ function AppContent() {
 
 function App() {
 
-  // useEffect(() => {
-  //   const storedUser = localStorage.getItem('user');
-  //   if (storedUser) {
-  //     setUser(JSON.parse(storedUser));
-  //   }
-  // }, []);
-
   return (
     <Router>
       <UserProvider>

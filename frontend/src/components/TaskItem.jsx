@@ -43,7 +43,7 @@ function TaskItem({ task }) {
                 <input type="checkbox"
                     checked={task.task_state}
                     onChange={() => handleToggleTaskState(task.ID)} />
-                <strong onClick={() => openModalForEditTask(task)} style={{ cursor: 'pointer', textDecoration: 'underline' }}>
+                <strong onClick={() => openModalForEditTask(task)} style={{ cursor: 'pointer' }}>
                     {task.task_name}
                 </strong>
             </div>

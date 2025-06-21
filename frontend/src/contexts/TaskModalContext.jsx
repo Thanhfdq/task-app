@@ -7,15 +7,15 @@ export const TaskModalProvider = ({ children }) => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [taskRefreshToken, setTaskRefreshToken] = useState(0);
 
-  const openModalForNewTask = () => {
-    setSelectedTask(null);
+  const openModalForNewTask = (initialData = {}) => {
+    setSelectedTask({ ...initialData });
     setShowModal(true);
   };
 
   const openModalForEditTask = (task) => {
     setSelectedTask(task);
     setShowModal(true);
-    console.log("open project id: "+task.PROJECT_ID);
+    console.log("open project id: " + task.PROJECT_ID);
   };
 
   const closeModal = () => {

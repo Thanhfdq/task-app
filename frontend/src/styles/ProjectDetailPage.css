@@ -1,0 +1,85 @@
+.project-detail-page {
+  padding: 24px;
+  background-color: #f5f6f8;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ==== Project Header ==== */
+.project-header {
+  background-color: #eaeaea;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.project-header h1 {
+  font-size: 28px;
+  margin: 0 0 10px;
+  color: #333;
+}
+
+.project-meta {
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 12px;
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.project-tags span {
+  background-color: #d1d8e0;
+  color: #333;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+/* ==== Tabs ==== */
+.project-tabs {
+  display: flex;
+  gap: 32px;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #ccc;
+}
+
+.project-tab {
+  cursor: pointer;
+  padding: 8px 0;
+  position: relative;
+  color: #555;
+  transition: color 0.2s;
+}
+
+.project-tab:hover {
+  color: #000;
+}
+
+.project-tab.active {
+  color: #000;
+  font-weight: 600;
+}
+
+.project-tab.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 2px;
+  width: 100%;
+  background-color: #4b82f1;
+  border-radius: 2px;
+}
+
+/* ==== View Container ==== */
+.project-view-container {
+  margin-top: 12px;
+}

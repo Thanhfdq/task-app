@@ -4,8 +4,44 @@ import db from '../middlewares/db.js';
 
 const router = express.Router();
 
+const checkAuth = function (req) {
+  const userId = req.session.userId;
+  if (!userId) return false;
+  return true;
+}
+
+// GET /projects/:id - Get project detail
+router.get('/:id', async (req, res) => {
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+  const projectId = req.params.id;
+
+  try {
+    const [rows] = await db.query(
+      `SELECT 
+          p.*,
+          u.username as manager_username, u.user_fullname as manager_fullname
+        FROM Projects p
+        JOIN Users u ON p.MANAGER_ID = u.ID
+        WHERE p.ID = ? AND (p.MANAGER_ID = ? OR EXISTS (
+          SELECT 1 FROM Project_members WHERE project_id = p.ID AND member_id = ?
+        )) AND p.is_archive = 0`,
+      [projectId, userId, userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Project not found or no permission' });
+    }
+
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Error fetching project detail:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 //Get 5 recent projects
-router.get('/recent', async (req, res) => {
+router.get('/me/recent', async (req, res) => {
   const userId = req.session.userId;
   if (!userId) return res.status(401).json({ message: 'Not authenticated' });
 
@@ -16,7 +52,7 @@ router.get('/recent', async (req, res) => {
       FROM Projects p
       JOIN Users u ON p.MANAGER_ID = u.ID
       LEFT JOIN Project_members pm ON pm.PROJECT_ID = p.ID
-      WHERE p.MANAGER_ID = ? OR pm.MEMBER_ID = ?
+      WHERE (p.MANAGER_ID = ? OR pm.MEMBER_ID = ?) AND p.is_archive = 0
       GROUP BY p.ID
       ORDER BY p.start_date DESC
       LIMIT 5
@@ -43,7 +79,7 @@ router.get('/', async (req, res) => {
       FROM Projects p
       JOIN Users u ON p.MANAGER_ID = u.ID
       LEFT JOIN Project_members pm ON pm.PROJECT_ID = p.ID
-      WHERE p.MANAGER_ID = ? OR pm.MEMBER_ID = ?
+      WHERE (p.MANAGER_ID = ? OR pm.MEMBER_ID = ?) AND p.is_archive = 0
       GROUP BY p.ID
       `,
       [userId, userId]
@@ -56,10 +92,31 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /projects/:projectId/tasks - Lấy danh sách task thuộc dự án
+router.get('/:projectId/tasks', async (req, res) => {
+  if (!checkAuth(req)) return res.status(401).json({ message: 'Not authenticated' });
+
+  const projectId = req.params.projectId;
+
+  try {
+    const [tasks] = await db.query(
+      `SELECT Tasks.*, Users.username AS performer_username 
+       FROM Tasks 
+       LEFT JOIN Users ON Tasks.performer_id = Users.ID
+       WHERE Tasks.project_id = ? AND Tasks.is_archive = 0`,
+      [projectId]
+    );
+
+    res.json(tasks);
+  } catch (err) {
+    console.error('Error fetching tasks of project:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Get all members in a project
 router.get('/:projectId/members', async (req, res) => {
-  const userId = req.session.userId;
-  if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+  if (!checkAuth(req)) return res.status(401).json({ message: 'Not authenticated' });
 
   const { projectId } = req.params;
 
@@ -80,8 +137,7 @@ router.get('/:projectId/members', async (req, res) => {
 });
 
 router.get('/:projectId/groups', async (req, res) => {
-  const userId = req.session.userId;
-  if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+  if (!checkAuth(req)) return res.status(401).json({ message: 'Not authenticated' });
 
   const { projectId } = req.params;
 
@@ -99,5 +155,26 @@ router.get('/:projectId/groups', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+router.post('/:projectId/groups', async (req, res) => {
+  if (!checkAuth(req)) return res.status(401).json({ message: 'Not authenticated' });
+
+  const { name } = req.body;
+  const projectId = req.params.projectId;
+
+  try {
+    const [result] = await db.query(
+      `INSERT INTO Task_groups (group_name, PROJECT_ID) VALUES (?, ?)`,
+      [name, projectId]
+    );
+
+    const [group] = await db.query(`SELECT * FROM Task_groups WHERE ID = ?`, [result.insertId]);
+    res.status(201).json(group[0]);
+  } catch (err) {
+    console.error("Error creating group:", err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 export default router;

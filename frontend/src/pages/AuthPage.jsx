@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import axios from "../services/api";
 
 export default function AuthPage({ onAuthSuccess }) {
@@ -6,6 +7,7 @@ export default function AuthPage({ onAuthSuccess }) {
     const [form, setForm] = useState({ username: "", password: "" });
 
     const toggleForm = () => setIsRegistering(!isRegistering);
+    const navigate = useNavigate();
 
     const handleChange = e => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -22,6 +24,7 @@ export default function AuthPage({ onAuthSuccess }) {
             if (res.data && res.data.success) {
                 localStorage.setItem('user', JSON.stringify(res.data.user));
                 onAuthSuccess(res.data.user); // navigate to main screen
+                navigate('/tasks');
             } else {
                 alert("Login/Register failed.");
             }
