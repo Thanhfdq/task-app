@@ -138,7 +138,7 @@ router.get('/:projectId/members', async (req, res) => {
 
   try {
     const [rows] = await db.query(
-      `SELECT Users.ID, Users.username
+      `SELECT Users.ID, Users.username, Users.user_fullname
              FROM Users
              JOIN Project_members ON Users.ID = Project_members.member_id
              WHERE Project_members.project_id = ?`,

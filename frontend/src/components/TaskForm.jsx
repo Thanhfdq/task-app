@@ -15,14 +15,14 @@ function TaskForm({ task = {} }) {
         start_date: '',
         end_date: '',
         progress: 0,
-        performer_id: user.id,
-        project_id: null,
-        group_id: null,
+        PERFORMER_ID: user.id,
+        PROJECT_ID: null,
+        GROUP_ID: null,
     });
 
     const [performers, setPerformers] = useState([]);
     const [groups, setGroups] = useState([]);
-    console.log("Project id: " + formData.project_id);
+    console.log("Project id: " + formData.PROJECT_ID);
 
 
     useEffect(() => {
@@ -32,24 +32,24 @@ function TaskForm({ task = {} }) {
     }, [task]);
 
     useEffect(() => {
-        console.log("Have Project id? " + formData.project_id);
-        if (formData.project_id) {
-            axios.get(`/projects/${formData.project_id}/members`).then(res => setPerformers(res.data));
-            axios.get(`/projects/${formData.project_id}/groups`).then(res => setGroups(res.data));
+        console.log("Have Project id? " + formData.PROJECT_ID);
+        if (formData.PROJECT_ID) {
+            axios.get(`/projects/${formData.PROJECT_ID}/members`).then(res => setPerformers(res.data));
+            axios.get(`/projects/${formData.PROJECT_ID}/groups`).then(res => setGroups(res.data));
         } else {
             setPerformers([]);
             setGroups([]);
         }
-    }, [formData.project_id]);
+    }, [formData.PROJECT_ID]);
 
     useEffect(() => {
-        if (!formData.project_id && user?.id) {
+        if (!formData.PROJECT_ID && user?.id) {
             setFormData(prev => ({
                 ...prev,
-                performer_id: user.id
+                PERFORMER_ID: user.id
             }));
         }
-    }, [formData.project_id, user?.id]);
+    }, [formData.PROJECT_ID, user?.id]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -65,7 +65,7 @@ function TaskForm({ task = {} }) {
             end_date: formData.end_date ? format(new Date(formData.end_date), 'yyyy-MM-dd') : null,
         };
 
-        console.log("This is the final performer: " + cleanFormData.performer_id);
+        console.log("This is the final performer: " + cleanFormData.PERFORMER_ID);
         if (formData.ID) {
             await axios.put(`/tasks/${formData.ID}`, cleanFormData);
         } else {
@@ -168,8 +168,8 @@ function TaskForm({ task = {} }) {
 
                 <section className="task-section">
                     <label>Người thực hiện</label>
-                    {formData.project_id ? (
-                        <select name="performer_id" value={formData.performer_id || ''} onChange={handleChange}>
+                    {formData.PROJECT_ID ? (
+                        <select name="PERFORMER_ID" value={formData.PERFORMER_ID || ''} onChange={handleChange}>
                             <option value="">-- Chọn người --</option>
                             {performers.map(p =>
                                 <option key={p.ID} value={p.ID}>{p.username}</option>

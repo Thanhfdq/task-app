@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from '../services/api';
 import KanbanView from './KanbanView';
 import CalendarView from './CalendarView';
+import TimelineView from './TimeLineView';
 import '../styles/ProjectDetailPage.css';
 
 const TABS = ['kanban', 'list', 'calendar', 'timeline'];

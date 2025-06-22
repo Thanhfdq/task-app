@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from "@fullcalendar/interaction";
+import viLocale from '@fullcalendar/core/locales/vi';
 import axios from '../services/api';
 import '../styles/CalendarView.css';
 import { useTaskModal } from '../contexts/TaskModalContext';
@@ -153,6 +154,7 @@ export default function CalendarView({ project }) {
             <FullCalendar
                 plugins={[dayGridPlugin, interactionPlugin]}
                 initialView="dayGridMonth"
+                locale={viLocale}
                 events={fetchEvents}
                 eventContent={renderEventContent}
                 eventTextColor="black"

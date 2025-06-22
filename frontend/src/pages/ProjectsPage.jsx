@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import axios from '../services/api';
 import '../styles/ProjectsPage.css';
 
@@ -70,14 +71,16 @@ function ProjectsPage({ user }) {
 
             <ul className="project-list">
                 {paginated.map(p => (
-                    <li key={p.ID} className="project-card">
-                        <h3>{p.project_name}</h3>
-                        <p><strong>Người quản lý:</strong> {p.manager_username}</p>
-                        <p><strong>Ngày bắt đầu:</strong> {p.start_date}</p>
-                        <p><strong>Ngày kết thúc:</strong> {p.end_date}</p>
-                        <p><strong>Mô tả:</strong> {p.description || 'Không có mô tả'}</p>
-                        <p><strong>Trạng thái:</strong> {p.is_archive ? 'Đã lưu trữ' : 'Đang hoạt động'}</p>
-                    </li>
+                    <Link to={`/projects/${p.ID}`}>
+                        <li key={p.ID} className="project-card">
+                            <h3>{p.project_name}</h3>
+                            <p><strong>Người quản lý:</strong> {p.manager_username}</p>
+                            <p><strong>Ngày bắt đầu:</strong> {p.start_date}</p>
+                            <p><strong>Ngày kết thúc:</strong> {p.end_date}</p>
+                            <p><strong>Mô tả:</strong> {p.description || 'Không có mô tả'}</p>
+                            <p><strong>Trạng thái:</strong> {p.is_archive ? 'Đã lưu trữ' : 'Đang hoạt động'}</p>
+                        </li>
+                    </Link>
                 ))}
             </ul>
 
