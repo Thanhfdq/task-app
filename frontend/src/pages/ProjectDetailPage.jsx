@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from '../services/api';
 import KanbanView from './KanbanView';
+import CalendarView from './CalendarView';
 import '../styles/ProjectDetailPage.css';
 
 const TABS = ['kanban', 'list', 'calendar', 'timeline'];

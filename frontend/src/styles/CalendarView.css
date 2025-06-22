@@ -1,0 +1,11 @@
+.fc .fc-event {
+  border: none;
+  border-radius: 5px;
+  padding: 2px 4px;
+  font-size: 0.85rem;
+  color: white;
+}
+
+.fc .fc-daygrid-event-dot {
+  display: none;
+}
