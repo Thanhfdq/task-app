@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from "@fullcalendar/interaction";
@@ -6,11 +6,9 @@ import axios from '../services/api';
 import '../styles/CalendarView.css';
 import { useTaskModal } from '../contexts/TaskModalContext';
 
-
 export default function CalendarView({ project }) {
     const [events, setEvents] = useState([]);
     const { openModalForEditTask, openModalForNewTask } = useTaskModal();
-
 
     const fetchEvents = async (info, successCallback, failureCallback) => {
         try {
@@ -18,11 +16,12 @@ export default function CalendarView({ project }) {
             const transformed = res.data.map(task => ({
                 id: task.ID,
                 title: task.task_name,
-                start: task.start_date || task.end_date,
-                end: task.end_date,
+                start: task.start_date,
+                end: task.end_date ? addOneDay(task.end_date) : undefined, // FC end is exclusive
                 backgroundColor: !task.task_state
-                    ? getColorByLabel(task.label, task.start_date, task.end_date)
+                    ? getColorByLabel(task.start_date, task.end_date)
                     : undefined,
+                allDay: true,
                 extendedProps: task
             }));
             successCallback(transformed);
@@ -32,15 +31,39 @@ export default function CalendarView({ project }) {
         }
     };
 
+    function parseLocalDate(dateStr) {
+        const [y, m, d] = dateStr.split('-').map(Number);
+        return new Date(y, m - 1, d); // không có giờ → mặc định là 00:00 LOCAL TIME
+    }
 
-    function renderEventContent(eventInfo) {
+
+    function formatDate(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    function addOneDay(dateStr) {
+        const date = parseLocalDate(dateStr);
+        date.setDate(date.getDate() + 1);
+        return formatDate(date);
+    }
+
+    function subtractOneDay(dateStr) {
+        const date = parseLocalDate(dateStr);
+        date.setDate(date.getDate() - 1);
+        return formatDate(date);
+    }
+
+    const renderEventContent = (eventInfo) => {
         const { task_state, ID } = eventInfo.event.extendedProps;
 
         const handleCheckboxClick = async (e) => {
-            e.stopPropagation(); // prevent calendar click
+            e.stopPropagation();
             try {
                 await axios.patch(`/tasks/${ID}/toggle-state`);
-                eventInfo.view.calendar.refetchEvents(); // optional: refresh calendar
+                eventInfo.view.calendar.refetchEvents();
             } catch (err) {
                 console.error('Failed to toggle task state:', err);
             }
@@ -50,7 +73,7 @@ export default function CalendarView({ project }) {
             <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                color: task_state ? '#999' : 'black', // gray if done
+                color: task_state ? '#999' : 'black',
                 fontWeight: 'bold',
                 textDecoration: task_state ? 'line-through' : 'none'
             }}>
@@ -63,35 +86,28 @@ export default function CalendarView({ project }) {
                 <span>{eventInfo.event.title}</span>
             </div>
         );
-    }
+    };
 
-    const getColorByLabel = (label, startDate, endDate) => {
-        const today = new Date();
-        const dueDate = endDate ? new Date(endDate) : (startDate ? new Date(startDate) : null);
+    const getColorByLabel = (startDateStr, endDateStr) => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const dueStr = endDateStr || startDateStr;
+        if (!dueStr) return '#fff';
 
-        if (dueDate) {
-            // Overdue
-            if (dueDate < today.setHours(0, 0, 0, 0)) {
-                return '#dc3545'; // red
-            }
-            // Due in 7 days or less
-            const diffTime = dueDate - new Date(today.setHours(0, 0, 0, 0));
-            const diffDays = diffTime / (1000 * 60 * 60 * 24);
-            if (diffDays <= 7) {
-                return '#ffc107'; // yellow
-            }
-        }
-        return '#fff'; // white
+        if (dueStr < todayStr) return '#dc3545'; // overdue
+
+        const diffDays = Math.floor(
+            (new Date(dueStr) - new Date(todayStr)) / (1000 * 60 * 60 * 24)
+        );
+
+        if (diffDays <= 7) return '#ffc107'; // due soon
+
+        return '#fff';
     };
 
     const handleEventClick = (info) => {
         const task = info.event.extendedProps;
-        const taskWithProjectName = {
-            ...task,
-            project_name: project.project_name
-        };
-
-        openModalForEditTask(taskWithProjectName);
+        console.log("Startday"+ task.start_date + " Endday: " + task.end_date);
+        openModalForEditTask({ ...task, project_name: project.project_name });
     };
 
     const handleDateClick = (info) => {
@@ -102,6 +118,35 @@ export default function CalendarView({ project }) {
         });
     };
 
+    const handleEventDrop = async (info) => {
+        const { id, start, end } = info.event;
+        try {
+            await axios.put(`/tasks/${id}`, {
+                start_date: formatDate(start),
+                end_date: end ? subtractOneDay(formatDate(end)) : null,
+            });
+            info.view.calendar.refetchEvents();
+            console.log("Startday"+ start + " Endday: " + end);
+            console.log("Startday"+ start?.toISOString().split('T')[0] + " Endday: " + end?.toISOString().split('T')[0]);
+        } catch (err) {
+            console.error('Failed to update task date:', err);
+            info.revert();
+        }
+    };
+
+    const handleEventResize = async (info) => {
+        const { id, start, end } = info.event;
+        try {
+            await axios.put(`/tasks/${id}`, {
+                start_date: formatDate(start),
+                end_date: end ? subtractOneDay(formatDate(end)) : null,
+            });
+            info.view.calendar.refetchEvents();
+        } catch (err) {
+            console.error('Failed to resize task:', err);
+            info.revert();
+        }
+    };
 
     return (
         <div className="calendar-view">
@@ -114,6 +159,10 @@ export default function CalendarView({ project }) {
                 eventClick={handleEventClick}
                 dateClick={handleDateClick}
                 height="auto"
+                editable={true}
+                eventResizableFromStart={true}
+                eventDrop={handleEventDrop}
+                eventResize={handleEventResize}
             />
         </div>
     );

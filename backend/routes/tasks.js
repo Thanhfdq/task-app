@@ -7,6 +7,7 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   const userId = req.session.userId;
   if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+
   const {
     projectId,
     assigneeId,
@@ -20,14 +21,16 @@ router.get('/', async (req, res) => {
   try {
     let sql = `SELECT Tasks.*, 
             Users.username AS performer_username, 
-            Projects.project_name FROM Tasks
+            Projects.project_name,
+            DATE_FORMAT(Tasks.start_date, '%Y-%m-%d') AS start_date,
+            DATE_FORMAT(Tasks.end_date, '%Y-%m-%d') AS end_date,
+            DATE_FORMAT(Tasks.complete_date, '%Y-%m-%d') AS complete_date
+          FROM Tasks
+          LEFT JOIN Users ON Tasks.PERFORMER_ID = Users.ID
+          LEFT JOIN Projects ON Tasks.PROJECT_ID = Projects.ID
+          WHERE (PERFORMER_ID = ? OR Projects.MANAGER_ID = ?)`;
 
-            LEFT JOIN Users ON Tasks.PERFORMER_ID = Users.ID
-            LEFT JOIN Projects ON Tasks.PROJECT_ID = Projects.ID
-            WHERE (PERFORMER_ID = ? OR Projects.MANAGER_ID = ?)`;
-    const params = [];
-    params.push(userId);
-    params.push(userId);
+    const params = [userId, userId];
 
     if (projectId) {
       sql += ` AND PROJECT_ID = ?`;
@@ -88,8 +91,6 @@ router.patch('/:id/toggle-state', async (req, res) => {
     if (!task) return res.status(404).json({ message: 'Task not found' });
 
     const newState = !task.task_state;
-
-    // Xử lý complete_date tuỳ theo trạng thái mới
     const completeDate = newState ? new Date() : null;
 
     await db.query(
@@ -140,23 +141,31 @@ router.put('/:id', async (req, res) => {
   if (!userId) return res.status(401).json({ message: 'Not authenticated' });
 
   const taskId = req.params.id;
-  const {
-    task_name, task_description, start_date, end_date,
-    label, progress, PROJECT_ID, GROUP_ID, PERFORMER_ID
-  } = req.body;
+  const allowedFields = [
+    'task_name', 'task_description', 'start_date', 'end_date',
+    'label', 'progress', 'performer_id', 'project_id', 'group_id'
+  ];
+
+  const fields = [];
+  const values = [];
+
+  for (const key of allowedFields) {
+    if (req.body[key] !== undefined) {
+      fields.push(`${key} = ?`);
+      values.push(req.body[key]);
+    }
+  }
+
+  if (fields.length === 0) {
+    return res.status(400).json({ message: 'No valid fields to update' });
+  }
+
+  values.push(taskId);
+
+  const sql = `UPDATE Tasks SET ${fields.join(', ')} WHERE ID = ?`;
 
   try {
-    await db.query(
-      `UPDATE Tasks SET
-        task_name = ?, task_description = ?, start_date = ?, end_date = ?,
-        label = ?, progress = ?, performer_id = ?, project_id = ?, group_id = ?
-      WHERE ID = ?`,
-      [
-        task_name, task_description, start_date, end_date,
-        label, progress, PERFORMER_ID, PROJECT_ID, GROUP_ID, taskId
-      ]
-    );
-
+    await db.query(sql, values);
     res.json({ success: true });
   } catch (err) {
     console.error(err);
@@ -198,9 +207,13 @@ router.patch('/:id/move', async (req, res) => {
   if (!userId) return res.status(401).json({ message: 'Not authenticated' });
   const { id } = req.params;
   const { new_group_id } = req.body;
-  await db.query('UPDATE tasks SET GROUP_ID = ? WHERE ID = ?', [new_group_id, id]);
-  res.sendStatus(200);
+  try {
+    await db.query('UPDATE tasks SET GROUP_ID = ? WHERE ID = ?', [new_group_id, id]);
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to move task' });
+  }
 });
-
 
 export default router;

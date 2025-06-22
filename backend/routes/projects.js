@@ -19,7 +19,9 @@ router.get('/:id', async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT 
-          p.*,
+          p.ID, p.project_name, p.manager_id, p.project_description, p.is_archive,
+          DATE_FORMAT(p.start_date, '%Y-%m-%d') AS start_date,
+          DATE_FORMAT(p.end_date, '%Y-%m-%d') AS end_date,
           u.username as manager_username, u.user_fullname as manager_fullname
         FROM Projects p
         JOIN Users u ON p.MANAGER_ID = u.ID
@@ -48,7 +50,12 @@ router.get('/me/recent', async (req, res) => {
   try {
     const [rows] = await db.query(
       `
-      SELECT p.ID AS project_id, p.project_name, u.username AS manager_username
+      SELECT 
+          p.ID AS project_id, 
+          p.project_name, 
+          u.username AS manager_username,
+          DATE_FORMAT(p.start_date, '%Y-%m-%d') AS start_date,
+          DATE_FORMAT(p.end_date, '%Y-%m-%d') AS end_date
       FROM Projects p
       JOIN Users u ON p.MANAGER_ID = u.ID
       LEFT JOIN Project_members pm ON pm.PROJECT_ID = p.ID
@@ -75,7 +82,11 @@ router.get('/', async (req, res) => {
   try {
     const [rows] = await db.query(
       `
-      SELECT p.*, u.username AS manager_username
+      SELECT 
+          p.ID, p.project_name, p.manager_id, p.project_description, p.is_archive,
+          DATE_FORMAT(p.start_date, '%Y-%m-%d') AS start_date,
+          DATE_FORMAT(p.end_date, '%Y-%m-%d') AS end_date,
+          u.username AS manager_username
       FROM Projects p
       JOIN Users u ON p.MANAGER_ID = u.ID
       LEFT JOIN Project_members pm ON pm.PROJECT_ID = p.ID
@@ -100,7 +111,12 @@ router.get('/:projectId/tasks', async (req, res) => {
 
   try {
     const [tasks] = await db.query(
-      `SELECT Tasks.*, Users.username AS performer_username 
+      `SELECT 
+         Tasks.*,
+         DATE_FORMAT(Tasks.start_date, '%Y-%m-%d') AS start_date,
+         DATE_FORMAT(Tasks.end_date, '%Y-%m-%d') AS end_date,
+         DATE_FORMAT(Tasks.complete_date, '%Y-%m-%d') AS complete_date,
+         Users.username AS performer_username 
        FROM Tasks 
        LEFT JOIN Users ON Tasks.performer_id = Users.ID
        WHERE Tasks.project_id = ? AND Tasks.is_archive = 0`,

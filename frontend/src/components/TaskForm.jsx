@@ -92,9 +92,8 @@ function TaskForm({ task = {} }) {
     };
 
     function formatDateForInput(dateString) {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        return date.toISOString().split('T')[0]; // "2025-06-04"
+        console.log("Date string: " + dateString?.substring(0, 10) || '');
+        return dateString?.substring(0, 10) || '';
     }
 
     return (
