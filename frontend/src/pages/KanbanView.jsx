@@ -2,14 +2,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from '../services/api';
 import '../styles/KanbanView.css';
 import { useTaskModal } from '../contexts/TaskModalContext';
+import { useClickAway } from 'react-use';
 
 export default function KanbanView({ project }) {
     const [columns, setColumns] = useState([]);
     const [tasksByColumn, setTasksByColumn] = useState({});
     const [isAddingColumn, setIsAddingColumn] = useState(false);
     const [newColumnName, setNewColumnName] = useState('');
+    const [openMenuColId, setOpenMenuColId] = useState(null);
     const inputRef = useRef(null);
+    const menuRef = useRef(null);
     const { openModalForNewTask, openModalForEditTask, taskRefreshToken, triggerTaskRefresh } = useTaskModal();
+
+    // Optional: close menu when clicking outside
+    useClickAway(menuRef, () => setOpenMenuColId(null));
 
     useEffect(() => {
         loadColumnsAndTasks();
@@ -116,6 +122,17 @@ export default function KanbanView({ project }) {
         }
     };
 
+    const handleRemoveColumn = async (colId) => {
+        try {
+            await axios.delete(`/projects/${project.ID}/groups/${colId}`);
+            setOpenMenuColId(null);
+            loadColumnsAndTasks();
+            triggerTaskRefresh();
+        } catch (err) {
+            console.error("Error removing column:", err);
+        }
+    };
+
     const loadColumnsAndTasks = async () => {
         try {
             const [colRes, taskRes] = await Promise.all([
@@ -139,43 +156,85 @@ export default function KanbanView({ project }) {
 
     return (
         <div className="kanban-view">
-            {columns.map((col) => (
-                <div key={col.ID} className="kanban-column"
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, col.ID)}>
-                    <div className="kanban-column-header">
-                        <h4>{col.group_name}</h4>
-                        <span>{tasksByColumn[col.ID]?.length || 0}</span>
-                    </div>
-                    <div className="kanban-cards">
-                        {(tasksByColumn[col.ID] || []).map(task => (
-                            <div
-                                key={task.ID}
-                                className="kanban-card"
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, task)}
-                                onClick={() => openModalForEditTask(task)}
-                            >
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        checked={!!task.task_state}
-                                        onChange={() => handleCheckboxChange(task)}
-                                    />
-                                    {task.task_state ? 'Hoàn thành' : 'Chưa xong'}
-                                </label>
-                                <h5 onClick={() => handleEditTask(task)} style={{ cursor: 'pointer' }}>{task.task_name}</h5>
-                                <p>{task.task_description}</p>
-                                <div className="task-meta">
-                                    <span>⏱ {task.end_date || 'Unknown'}</span>
-                                    <span>👤 {task.performer_username || 'Unassigned'}</span>
+            {columns.map((col) => {
+                const isEmpty = !tasksByColumn[col.ID] || tasksByColumn[col.ID].length === 0;
+                return (
+                    <div key={col.ID} className="kanban-column"
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, col.ID)}>
+                        <div className="kanban-column-header" style={{ position: 'relative' }}>
+                            <h4>{col.group_name}</h4>
+                            <span>{tasksByColumn[col.ID]?.length || 0}</span>
+                            <button
+                                className="kanban-more-btn"
+                                onClick={() => setOpenMenuColId(openMenuColId === col.ID ? null : col.ID)}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', marginLeft: 8 }}
+                                aria-label="More"
+                            >⋮</button>
+                            {openMenuColId === col.ID && (
+                                <div
+                                    className="kanban-more-menu"
+                                    ref={menuRef}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 30,
+                                        right: 0,
+                                        background: '#fff',
+                                        border: '1px solid #ccc',
+                                        borderRadius: 4,
+                                        zIndex: 10,
+                                        minWidth: 120,
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                                    }}
+                                >
+                                    <button
+                                        onClick={() => handleRemoveColumn(col.ID)}
+                                        disabled={!isEmpty}
+                                        style={{
+                                            width: '100%',
+                                            padding: '8px 12px',
+                                            background: 'none',
+                                            border: 'none',
+                                            color: isEmpty ? '#d00' : '#aaa',
+                                            cursor: isEmpty ? 'pointer' : 'not-allowed',
+                                            textAlign: 'left'
+                                        }}
+                                    >
+                                        Remove
+                                    </button>
                                 </div>
-                            </div>
-                        ))}
-                        <button className="add-card" onClick={() => handleAddCard(col.ID, project.ID)}>+ Add a Card</button>
+                            )}
+                        </div>
+                        <div className="kanban-cards">
+                            {(tasksByColumn[col.ID] || []).map(task => (
+                                <div
+                                    key={task.ID}
+                                    className="kanban-card"
+                                    draggable
+                                    onDragStart={(e) => handleDragStart(e, task)}
+                                    onClick={() => openModalForEditTask(task)}
+                                >
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            checked={!!task.task_state}
+                                            onChange={() => handleCheckboxChange(task)}
+                                        />
+                                        {task.task_state ? 'Hoàn thành' : 'Chưa xong'}
+                                    </label>
+                                    <h5 onClick={() => handleEditTask(task)} style={{ cursor: 'pointer' }}>{task.task_name}</h5>
+                                    <p>{task.task_description}</p>
+                                    <div className="task-meta">
+                                        <span>⏱ {task.end_date || 'Unknown'}</span>
+                                        <span>👤 {task.performer_username || 'Unassigned'}</span>
+                                    </div>
+                                </div>
+                            ))}
+                            <button className="add-card" onClick={() => handleAddCard(col.ID, project.ID)}>+ Add a Card</button>
+                        </div>
                     </div>
-                </div>
-            ))}
+                );
+            })}
             <div className="kanban-column add-column">
                 {!isAddingColumn ? (
                     <button onClick={() => setIsAddingColumn(true)}>+ Thêm cột</button>

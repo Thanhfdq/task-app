@@ -176,5 +176,34 @@ router.post('/:projectId/groups', async (req, res) => {
   }
 });
 
+// DELETE /projects/:projectId/groups/:groupId - Remove a group if it has no tasks
+router.delete('/:projectId/groups/:groupId', async (req, res) => {
+  if (!checkAuth(req)) return res.status(401).json({ message: 'Not authenticated' });
+
+  const { projectId, groupId } = req.params;
+
+  try {
+    // Check if the group has any tasks
+    const [tasks] = await db.query(
+      `SELECT COUNT(*) AS taskCount FROM Tasks WHERE group_id = ? AND project_id = ? AND is_archive = 0`,
+      [groupId, projectId]
+    );
+    if (tasks[0].taskCount > 0) {
+      return res.status(400).json({ message: 'Cannot delete group with tasks' });
+    }
+
+    // Delete the group
+    await db.query(
+      `DELETE FROM Task_groups WHERE ID = ? AND project_id = ?`,
+      [groupId, projectId]
+    );
+
+    res.json({ message: 'Group deleted' });
+  } catch (err) {
+    console.error('Error deleting group:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 export default router;
