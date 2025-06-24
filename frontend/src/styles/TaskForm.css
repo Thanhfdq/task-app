@@ -125,3 +125,32 @@
 .delete-btn:hover {
   background-color: #d6405f;
 }
+
+.task-form-grid {
+  display: flex;
+  gap: 24px;
+}
+
+.task-left {
+  flex: 7;
+  display: flex;
+  flex-direction: column;
+}
+
+.task-right {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+}
+
+.task-title-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.task-form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  gap: 12px;
+}

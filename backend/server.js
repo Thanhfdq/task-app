@@ -4,6 +4,7 @@ import session from 'express-session';
 import authRoutes from './routes/auth.js';
 import projectsRoutes from './routes/projects.js';
 import tasksRoutes from './routes/tasks.js';
+import userRoutes from './routes/user.js';
 import cors from 'cors';
 
 const app = express();
@@ -29,6 +30,7 @@ app.use(cors({
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectsRoutes);
 app.use('/api/tasks', tasksRoutes);
+app.use('/api/users', userRoutes);
 
 // ✅ Khởi động server
 const PORT = process.env.BACKEND_PORT || 3000;

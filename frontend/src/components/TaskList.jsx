@@ -1,14 +1,18 @@
 // src/components/TaskList.jsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import '../styles/TaskList.css';
 import TaskItem from '../components/Taskitem';
 
-function TaskList({ tasks, onClick }) {
+function TaskList({ tasks }) {
     const [currentPage, setCurrentPage] = useState(1);
     const tasksPerPage = 5;
 
     const [sortField, setSortField] = useState('complete_date');
     const [sortOrder, setSortOrder] = useState('asc');
+
+    useEffect(() => {
+        setCurrentPage(1); // Reset to first page when task list changes
+    }, [tasks]);
 
     const sortedTasks = useMemo(() => {
         const sorted = [...tasks].sort((a, b) => {
@@ -53,7 +57,7 @@ function TaskList({ tasks, onClick }) {
 
             <div className="task-list">
                 {paginatedTasks.map((task) => (
-                    <TaskItem task={task} />
+                    <TaskItem key={task.ID} task={task} />
                 ))}
 
                 {paginatedTasks.length === 0 && <p>Không có công việc nào.</p>}

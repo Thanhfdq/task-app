@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import timelinePlugin from '@fullcalendar/resource-timeline';
+import interactionPlugin from "@fullcalendar/interaction";
 import viLocale from '@fullcalendar/core/locales/vi';
 import axios from '../services/api';
 import '../styles/TimelineView.css';
@@ -9,51 +10,46 @@ import { useTaskModal } from '../contexts/TaskModalContext';
 export default function TimelineView({ project }) {
     const [resourceReloadKey, setResourceReloadKey] = useState(0);
     const [resources, setResources] = useState([]);
-    const [groupBy, setGroupBy] = useState('group'); // 'group' or 'user'
     const [taskFilter, setTaskFilter] = useState('all'); // 'done', 'undone', 'archive', 'all'
-    const { openModalForEditTask } = useTaskModal();
+    const { openModalForEditTask, openModalForNewTask } = useTaskModal();
 
     useEffect(() => {
         fetchResources();
-    }, [groupBy,resourceReloadKey]);
+    }, [resourceReloadKey]);
 
     const fetchResources = async () => {
         try {
-            if (groupBy === 'group') {
-                const resGroups = await axios.get(`/projects/${project.ID}/groups`);
-                const resTasks = await axios.get(`/projects/${project.ID}/tasks`);
+            const resGroups = await axios.get(`/projects/${project.ID}/groups`);
+            const resTasks = await axios.get(`/projects/${project.ID}/tasks`);
 
-                const grouped = resGroups.data.map(group => ({
+            const grouped = resGroups.data.map(group => {
+                const taskResources = resTasks.data
+                    .filter(task => task.GROUP_ID === group.ID)
+                    .map(task => ({
+                        id: `${task.ID}`,
+                        title: task.task_name,
+                        extendedProps: { task }
+                    }));
+
+                // ➕ Add button as a "fake" resource
+                const addResource = {
+                    id: `add-${group.ID}`,
+                    title: '+ Thêm công việc',
+                    extendedProps: {
+                        isAddButton: true,
+                        groupId: group.ID
+                    }
+                };
+
+                return {
                     id: `group-${group.ID}`,
                     title: group.group_name,
-                    children: resTasks.data
-                        .filter(task => task.GROUP_ID === group.ID)
-                        .map(task => ({
-                            id: `${task.ID}`,
-                            title: task.task_name,
-                            extendedProps: { task }
-                        }))
-                }));
+                    children: [...taskResources, addResource]
+                };
+            });
 
-                setResources(grouped);
-            } else {
-                const resUsers = await axios.get(`/projects/${project.ID}/members`);
-                const resTasks = await axios.get(`/projects/${project.ID}/tasks`);
+            setResources(grouped);
 
-                const grouped = resUsers.data.map(user => ({
-                    id: `user-${user.ID}`,
-                    title: user.user_fullname || user.username,
-                    children: resTasks.data
-                        .filter(task => task.PERFORMER_ID === user.ID)
-                        .map(task => ({
-                            id: `${task.ID}`,
-                            title: task.task_name,
-                            extendedProps: { task }
-                        }))
-                }));
-
-                setResources(grouped);
-            }
         } catch (err) {
             console.error('Error building collapsible resources:', err);
         }
@@ -85,6 +81,15 @@ export default function TimelineView({ project }) {
             failureCallback(error);
         }
     };
+
+    const handleDateClick = (info) => {
+        openModalForNewTask({
+            PROJECT_ID: project.ID,
+            start_date: info.dateStr,
+            end_date: info.dateStr,
+        });
+    };
+
 
     function parseLocalDate(dateStr) {
         const [y, m, d] = dateStr.split('-').map(Number);
@@ -129,42 +134,56 @@ export default function TimelineView({ project }) {
 
     return (
         <div className="calendar-view">
-            <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
-                <label>
-                    Nhóm theo:
-                    <select value={groupBy} onChange={e => setGroupBy(e.target.value)}>
-                        <option value="group">Nhóm công việc</option>
-                        <option value="user">Người thực hiện</option>
-                    </select>
-                </label>
-                <label>
-                    Lọc công việc:
-                    <select value={taskFilter} onChange={e => setTaskFilter(e.target.value)}>
-                        <option value="all">Tất cả</option>
-                        <option value="undone">Chưa hoàn thành</option>
-                        <option value="done">Đã hoàn thành</option>
-                        <option value="archive">Đã lưu trữ</option>
-                    </select>
-                </label>
-            </div>
+            <select value={taskFilter} onChange={e => setTaskFilter(e.target.value)}>
+                <option value="all">Tất cả</option>
+                <option value="undone">Chưa hoàn thành</option>
+                <option value="done">Đã hoàn thành</option>
+                <option value="archive">Đã lưu trữ</option>
+            </select>
             <FullCalendar
-                plugins={[timelinePlugin]}
+                plugins={[timelinePlugin, interactionPlugin]}
                 initialView="resourceTimelineMonth"
                 resources={resources}
                 locale={viLocale}
                 events={fetchEvents}
                 eventClick={handleEventClick}
                 height="auto"
+                slotMinHeight={20}
+                slotMaxHeight={20}
                 expandRows={true}
+                resourceAreaWidth="50%"
                 eventTextColor="black"
                 eventDidMount={handleEventColor}
-                resourceAreaHeaderContent="Nhóm"
                 resourceAreaColumns={[
                     {
                         field: 'title',
                         headerContent: 'Công việc',
                         cellContent: (args) => {
-                            const task = args.resource?._resource?.extendedProps?.task;
+                            const task = args.resource?.extendedProps?.task;
+                            const isAddButton = args.resource?.extendedProps?.isAddButton;
+                            const groupId = args.resource?.extendedProps?.groupId;
+
+                            console.log("isAddButton:", isAddButton, "Group ID:", groupId);
+                            if (isAddButton) {
+                                return (
+                                    console.log("Add button clicked for group:", groupId),
+                                    <button className="add-card"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            openModalForNewTask({
+                                                PROJECT_ID: project.ID,
+                                                GROUP_ID: groupId,
+                                                project_name: project.project_name,
+                                                start_date: new Date().toISOString().split('T')[0],
+                                                end_date: new Date().toISOString().split('T')[0]
+                                            });
+                                        }}
+                                    >
+                                        + Thêm công việc
+                                    </button>
+                                );
+                            }
+
                             if (!task) return args.resource.title;
 
                             const handleCheckboxClick = async (e) => {
@@ -178,10 +197,7 @@ export default function TimelineView({ project }) {
                             };
 
                             return (
-                                <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center', height: '100%'
-                                }}>
+                                <div>
                                     <input
                                         type="checkbox"
                                         checked={task.task_state}
@@ -202,11 +218,33 @@ export default function TimelineView({ project }) {
                         }
                     },
                     {
-                        headerContent: 'Label',
+                        headerContent: 'Ngày bắt đầu',
+                        field: 'start_date',
+                        cellContent: (args) => {
+                            const task = args.resource?.extendedProps?.task;
+                            return task !== null ? task?.start_date : '';
+                        }
+                    },
+                    {
+                        headerContent: 'Ngày kết thúc',
+                        field: 'end_date',
+                        cellContent: (args) => {
+                            const task = args.resource?.extendedProps?.task;
+                            return task !== null ? task?.end_date : '';
+                        }
+                    },
+                    {
+                        headerContent: 'Nhãn',
                         field: 'label',
                         cellContent: (args) => {
                             const task = args.resource?.extendedProps?.task;
-                            return task?.label || '';
+                            return task !== null ?
+                                task?.label.split(",").map((label) => (
+                                    <span key={label} className="label-pill">
+                                        {label}
+                                    </span>
+                                ))
+                                : '';
                         }
                     },
                     {
@@ -214,7 +252,11 @@ export default function TimelineView({ project }) {
                         field: 'progress',
                         cellContent: (args) => {
                             const task = args.resource?.extendedProps?.task;
-                            return task?.progress != null ? `${task.progress}%` : '';
+                            return task?.progress != null ?
+                                <div className="progress-bar">
+                                    <div className="progress-fill" style={{ width: `${task.progress}%` }} />
+                                </div>
+                                : '';
                         }
                     }
                 ]}

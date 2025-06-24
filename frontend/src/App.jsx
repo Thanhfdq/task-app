@@ -5,6 +5,7 @@ import AuthPage from './pages/AuthPage';
 import TaskModal from './components/TaskModal.jsx';
 import { UserProvider, useUser } from './contexts/UserContext.jsx';
 import { TaskModalProvider, useTaskModal } from './contexts/TaskModalContext.jsx';
+import './styles/App.css';
 
 function AppContent() {
   const { showTaskModal } = useTaskModal();

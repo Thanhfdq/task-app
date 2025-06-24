@@ -1,10 +1,11 @@
 /* Căn chỉnh layout */
 .calendar-view {
-  padding: 16px;
-  background-color: #f9f9f9;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-  font-family: 'Segoe UI', sans-serif;
+  height: 100%;
+}
+
+.fc-toolbar.fc-header-toolbar {
+  margin: 12px;
+  padding: 0 12px;
 }
 
 /* Hover task */
@@ -27,10 +28,7 @@
   border-radius: 3px;
 }
 
-.fc-timeline-event .fc-event-main {
-  display: flex;
-  align-items: center; /* ✅ align dọc */
-  height: 100%;
-  padding-left: 6px;
-  font-weight: 500;
+/* Tự động fit chiều cao theo nội dung */
+.fc-resource {
+  height: auto !important;
 }

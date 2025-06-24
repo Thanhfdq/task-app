@@ -112,19 +112,19 @@ router.post('/', async (req, res) => {
 
   const {
     task_name, task_description, start_date, end_date,
-    label, progress, performer_id, project_id, group_id, parent_task_id
+    label, progress, PERFORMER_ID, PROJECT_ID, GROUP_ID, parent_task_id
   } = req.body;
 
   try {
     const [result] = await db.query(
       `INSERT INTO Tasks (
         task_name, task_description, start_date, end_date,
-        label, progress, performer_id, project_id, group_id, parent_task_id,
+        label, progress, PERFORMER_ID, PROJECT_ID, GROUP_ID, parent_task_id,
         task_state, is_archive
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0)`,
       [
         task_name, task_description, start_date || null, end_date || null,
-        label, progress, performer_id, project_id || null, group_id, parent_task_id || null
+        label, progress, PERFORMER_ID, PROJECT_ID || null, GROUP_ID, parent_task_id || null
       ]
     );
 
@@ -143,7 +143,7 @@ router.put('/:id', async (req, res) => {
   const taskId = req.params.id;
   const allowedFields = [
     'task_name', 'task_description', 'start_date', 'end_date',
-    'label', 'progress', 'performer_id', 'project_id', 'group_id'
+    'label', 'progress', 'PERFORMER_ID', 'PROJECT_ID', 'GROUP_ID'
   ];
 
   const fields = [];
@@ -206,9 +206,9 @@ router.patch('/:id/move', async (req, res) => {
   const userId = req.session.userId;
   if (!userId) return res.status(401).json({ message: 'Not authenticated' });
   const { id } = req.params;
-  const { new_group_id } = req.body;
+  const { new_GROUP_ID } = req.body;
   try {
-    await db.query('UPDATE tasks SET GROUP_ID = ? WHERE ID = ?', [new_group_id, id]);
+    await db.query('UPDATE tasks SET GROUP_ID = ? WHERE ID = ?', [new_GROUP_ID, id]);
     res.sendStatus(200);
   } catch (err) {
     console.error(err);

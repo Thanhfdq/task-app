@@ -19,9 +19,7 @@ export default function CalendarView({ project }) {
                 title: task.task_name,
                 start: task.start_date,
                 end: task.end_date ? addOneDay(task.end_date) : undefined, // FC end is exclusive
-                backgroundColor: !task.task_state
-                    ? getColorByLabel(task.start_date, task.end_date)
-                    : undefined,
+                backgroundColor: getColorByDueDate(task.task_state, task.start_date, task.end_date),
                 allDay: true,
                 extendedProps: task
             }));
@@ -89,31 +87,31 @@ export default function CalendarView({ project }) {
         );
     };
 
-    const getColorByLabel = (startDateStr, endDateStr) => {
-        const todayStr = new Date().toISOString().split('T')[0];
-        const dueStr = endDateStr || startDateStr;
-        if (!dueStr) return '#fff';
+    const getColorByDueDate = (task_state, startDateStr, endDateStr) => {
+        if (!task_state) {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const dueStr = endDateStr || startDateStr;
+            if (!dueStr) return '#fff';
 
-        if (dueStr < todayStr) return '#dc3545'; // overdue
+            if (dueStr < todayStr) return '#dc3545'; // ❌ overdue - red
+            const diffDays = Math.floor(
+                (new Date(dueStr) - new Date(todayStr)) / (1000 * 60 * 60 * 24)
+            );
 
-        const diffDays = Math.floor(
-            (new Date(dueStr) - new Date(todayStr)) / (1000 * 60 * 60 * 24)
-        );
-
-        if (diffDays <= 7) return '#ffc107'; // due soon
-
-        return '#fff';
+            if (diffDays <= 7) return '#ffc107'; // ⚠️ due soon - yellow
+        }
+        return '#fff'; // ✅ ok - white
     };
 
     const handleEventClick = (info) => {
         const task = info.event.extendedProps;
-        console.log("Startday"+ task.start_date + " Endday: " + task.end_date);
+        console.log("Startday" + task.start_date + " Endday: " + task.end_date);
         openModalForEditTask({ ...task, project_name: project.project_name });
     };
 
     const handleDateClick = (info) => {
         openModalForNewTask({
-            project_id: project.ID,
+            PROJECT_ID: project.ID,
             start_date: info.dateStr,
             end_date: info.dateStr,
         });
@@ -127,8 +125,8 @@ export default function CalendarView({ project }) {
                 end_date: end ? subtractOneDay(formatDate(end)) : null,
             });
             info.view.calendar.refetchEvents();
-            console.log("Startday"+ start + " Endday: " + end);
-            console.log("Startday"+ start?.toISOString().split('T')[0] + " Endday: " + end?.toISOString().split('T')[0]);
+            console.log("Startday" + start + " Endday: " + end);
+            console.log("Startday" + start?.toISOString().split('T')[0] + " Endday: " + end?.toISOString().split('T')[0]);
         } catch (err) {
             console.error('Failed to update task date:', err);
             info.revert();

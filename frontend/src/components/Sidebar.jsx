@@ -1,37 +1,64 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import '../styles/sidebar.css';
-import { FaTasks, FaProjectDiagram, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { useTaskModal } from '../contexts/TaskModalContext';
+import {
+  FaTasks,
+  FaProjectDiagram,
+  FaChevronLeft,
+  FaChevronRight,
+  FaUserCircle,
+  FaPlus,
+  FaSearch,
+} from 'react-icons/fa';
+import '../styles/Sidebar.css';
 
-export default function Sidebar({ recentProjects }) {
+export default function Sidebar({ projects = [] }) {
   const [collapsed, setCollapsed] = useState(false);
-
-  const toggleSidebar = () => setCollapsed(prev => !prev);
+  const toggleSidebar = () => setCollapsed(!collapsed);
+  const { openModalForNewTask } = useTaskModal();
 
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
-      <div className="toggle-button" onClick={toggleSidebar}>
-        {collapsed ? <FaChevronRight /> : <FaChevronLeft />}
+      <div className="sidebar-header">
+        <button className="toggle-button" onClick={toggleSidebar}>
+          {collapsed ? <FaChevronRight /> : <FaChevronLeft />}
+        </button>
+        {!collapsed && <h3 className="app-title">TaskManager</h3>}
       </div>
 
-      <Link to="/tasks" className="sidebar-section">
-        <FaTasks />
-        {!collapsed && 'Công việc'}
-      </Link>
+      <nav className="sidebar-nav">
+        <button className="btn-primary" onClick={() => openModalForNewTask({
+          start_date: new Date().toISOString().substring(0, 10),
+          end_date: new Date().toISOString().substring(0, 10)
+        })}>
+          <FaPlus />
+          {!collapsed && <span>Công việc mới</span>}
+        </button>
+        <Link to="/projects" className="nav-item">
+          <FaProjectDiagram />
+          {!collapsed && <span>Danh sách</span>}
+        </Link>
+        <Link to="/tasks" className="nav-item">
+          <FaTasks />
+          {!collapsed && <span>Công việc</span>}
+        </Link>
+      </nav>
 
-      <Link to="/projects" className="sidebar-section">
-        <FaProjectDiagram />
-        {!collapsed && 'Dự án'}
-      </Link>
+      <div className="sidebar-actions">
+        <Link to="/tasks/my-tasks" className="btn-secondary nav-item">
+          <FaUserCircle />
+          {!collapsed && <span>Công việc của tôi</span>}
+        </Link>
+      </div>
 
       {!collapsed && (
         <div className="sidebar-recent">
-          <div className="sidebar-recent-title">Dự án gần đây</div>
+          <div className="sidebar-recent-title">Các danh sách</div>
           <ul className="sidebar-recent-list">
-            {recentProjects.map((p) => (
-              <li key={p.project_id} className="sidebar-recent-item">
-                <Link to={`/projects/${p.project_id}`}>
-                  ● {p.manager_username}/{p.project_name}
+            {projects.map((p) => (
+              <li key={p.ID}>
+                <Link to={`/projects/${p.ID}`}>
+                  {p.manager_username}/{p.project_name}
                 </Link>
               </li>
             ))}

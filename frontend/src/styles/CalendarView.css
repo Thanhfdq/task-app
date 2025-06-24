@@ -1,7 +1,10 @@
 .fc .fc-event {
-  border: none;
+  border-color: rgb(219, 219, 219);
   border-radius: 5px;
-  padding: 2px 4px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  padding: 4px;
   font-size: 0.85rem;
   color: white;
 }

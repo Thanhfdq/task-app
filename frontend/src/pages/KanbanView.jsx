@@ -23,15 +23,8 @@ export default function KanbanView({ project }) {
 
     const handleAddCard = (groupId, projectId) => {
         openModalForNewTask({
-            project_id: projectId,
-            group_id: groupId,
-            performer_id: null,
-            task_name: '',
-            task_description: '',
-            progress: 0,
-            label: '',
-            start_date: '',
-            end_date: ''
+            PROJECT_ID: projectId,
+            GROUP_ID: groupId,
         });
     };
 
@@ -65,7 +58,7 @@ export default function KanbanView({ project }) {
         if (sourceGroupId !== targetGroupId) {
             try {
                 await axios.patch(`/tasks/${taskId}/move`, {
-                    new_group_id: targetGroupId
+                    new_GROUP_ID: targetGroupId
                 });
                 triggerTaskRefresh();
             } catch (err) {
@@ -73,6 +66,23 @@ export default function KanbanView({ project }) {
             }
         }
     };
+
+    const getColorByDueDate = (task_state, startDateStr, endDateStr) => {
+        if (!task_state) {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const dueStr = endDateStr || startDateStr;
+            if (!dueStr) return '#fff';
+
+            if (dueStr < todayStr) return '#dc3545'; // ❌ overdue - red
+            const diffDays = Math.floor(
+                (new Date(dueStr) - new Date(todayStr)) / (1000 * 60 * 60 * 24)
+            );
+
+            if (diffDays <= 7) return '#ffc107'; // ⚠️ due soon - yellow
+        }
+        return '#fff'; // ✅ ok - white
+    };
+
 
     const handleDragOver = (e) => {
         e.preventDefault();
@@ -210,6 +220,9 @@ export default function KanbanView({ project }) {
                                 <div
                                     key={task.ID}
                                     className="kanban-card"
+                                    style={{
+                                        backgroundColor: getColorByDueDate(task.task_state, task.start_date, task.end_date)
+                                    }}
                                     draggable
                                     onDragStart={(e) => handleDragStart(e, task)}
                                     onClick={() => openModalForEditTask(task)}
@@ -230,14 +243,14 @@ export default function KanbanView({ project }) {
                                     </div>
                                 </div>
                             ))}
-                            <button className="add-card" onClick={() => handleAddCard(col.ID, project.ID)}>+ Add a Card</button>
+                            <button className="add-card" onClick={() => handleAddCard(col.ID, project.ID)}>+ Thêm công việc</button>
                         </div>
                     </div>
                 );
             })}
-            <div className="kanban-column add-column">
+            <div className="kanban-column">
                 {!isAddingColumn ? (
-                    <button onClick={() => setIsAddingColumn(true)}>+ Thêm cột</button>
+                    <button className='add-column' onClick={() => setIsAddingColumn(true)}>+ Thêm cột</button>
                 ) : (
                     <div className="add-column-form">
                         <input

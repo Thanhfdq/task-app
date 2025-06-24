@@ -1,4 +1,3 @@
-// /routes/projects.js
 import express from 'express';
 import db from '../middlewares/db.js';
 
@@ -26,7 +25,7 @@ router.get('/:id', async (req, res) => {
         FROM Projects p
         JOIN Users u ON p.MANAGER_ID = u.ID
         WHERE p.ID = ? AND (p.MANAGER_ID = ? OR EXISTS (
-          SELECT 1 FROM Project_members WHERE project_id = p.ID AND member_id = ?
+          SELECT 1 FROM Project_members WHERE PROJECT_ID = p.ID AND member_id = ?
         )) AND p.is_archive = 0`,
       [projectId, userId, userId]
     );
@@ -51,7 +50,7 @@ router.get('/me/recent', async (req, res) => {
     const [rows] = await db.query(
       `
       SELECT 
-          p.ID AS project_id, 
+          p.ID AS PROJECT_ID, 
           p.project_name, 
           u.username AS manager_username,
           DATE_FORMAT(p.start_date, '%Y-%m-%d') AS start_date,
@@ -83,7 +82,7 @@ router.get('/', async (req, res) => {
     const [rows] = await db.query(
       `
       SELECT 
-          p.ID, p.project_name, p.manager_id, p.project_description, p.is_archive,
+          p.*,
           DATE_FORMAT(p.start_date, '%Y-%m-%d') AS start_date,
           DATE_FORMAT(p.end_date, '%Y-%m-%d') AS end_date,
           u.username AS manager_username
@@ -103,7 +102,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /projects/:projectId/tasks - Lấy danh sách task thuộc dự án
+// GET /projects/:projectId/tasks - Lấy danh sách task thuộc danh sách
 router.get('/:projectId/tasks', async (req, res) => {
   if (!checkAuth(req)) return res.status(401).json({ message: 'Not authenticated' });
 
@@ -118,8 +117,8 @@ router.get('/:projectId/tasks', async (req, res) => {
          DATE_FORMAT(Tasks.complete_date, '%Y-%m-%d') AS complete_date,
          Users.username AS performer_username 
        FROM Tasks 
-       LEFT JOIN Users ON Tasks.performer_id = Users.ID
-       WHERE Tasks.project_id = ? AND Tasks.is_archive = 0`,
+       LEFT JOIN Users ON Tasks.PERFORMER_ID = Users.ID
+       WHERE Tasks.PROJECT_ID = ? AND Tasks.is_archive = 0`,
       [projectId]
     );
 
@@ -141,13 +140,13 @@ router.get('/:projectId/members', async (req, res) => {
       `SELECT Users.ID, Users.username, Users.user_fullname
              FROM Users
              JOIN Project_members ON Users.ID = Project_members.member_id
-             WHERE Project_members.project_id = ?`,
+             WHERE Project_members.PROJECT_ID = ?`,
       [projectId]
     );
 
     res.json(rows);
   } catch (err) {
-    console.error('Lỗi khi lấy thành viên dự án:', err);
+    console.error('Lỗi khi lấy thành viên danh sách:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -161,7 +160,7 @@ router.get('/:projectId/groups', async (req, res) => {
     const [rows] = await db.query(
       `SELECT ID, group_name
              FROM Task_groups
-             WHERE project_id = ?`,
+             WHERE PROJECT_ID = ?`,
       [projectId]
     );
 
@@ -201,7 +200,7 @@ router.delete('/:projectId/groups/:groupId', async (req, res) => {
   try {
     // Check if the group has any tasks
     const [tasks] = await db.query(
-      `SELECT COUNT(*) AS taskCount FROM Tasks WHERE group_id = ? AND project_id = ? AND is_archive = 0`,
+      `SELECT COUNT(*) AS taskCount FROM Tasks WHERE GROUP_ID = ? AND PROJECT_ID = ? AND is_archive = 0`,
       [groupId, projectId]
     );
     if (tasks[0].taskCount > 0) {
@@ -210,13 +209,250 @@ router.delete('/:projectId/groups/:groupId', async (req, res) => {
 
     // Delete the group
     await db.query(
-      `DELETE FROM Task_groups WHERE ID = ? AND project_id = ?`,
+      `DELETE FROM Task_groups WHERE ID = ? AND PROJECT_ID = ?`,
       [groupId, projectId]
     );
 
     res.json({ message: 'Group deleted' });
   } catch (err) {
     console.error('Error deleting group:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.post('/', async (req, res) => {
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+
+  const {
+    project_name,
+    project_description,
+    project_state = false,      // Mặc định là đang mở
+    is_archive = false,         // Mặc định chưa lưu trữ
+    label,
+    start_date,
+    end_date,
+    complete_date
+  } = req.body;
+
+  if (!project_name) {
+    return res.status(400).json({ message: 'project_name is required' });
+  }
+
+  try {
+    const [result] = await db.query(
+      `INSERT INTO Projects 
+        (project_name, project_description, project_state, is_archive, label, start_date, end_date, complete_date, MANAGER_ID)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [project_name, project_description, project_state, is_archive, label, start_date, end_date, complete_date, userId]
+    );
+
+    const [newProject] = await db.query(`SELECT * FROM Projects WHERE ID = ?`, [result.insertId]);
+    res.status(201).json(newProject[0]);
+  } catch (err) {
+    console.error('Error creating project:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.put('/:id', async (req, res) => {
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+
+  const projectId = req.params.id;
+
+  const {
+    project_name,
+    project_description,
+    project_state,
+    is_archive,
+    label,
+    start_date,
+    end_date,
+    complete_date = null
+  } = req.body;
+
+  try {
+    // Kiểm tra quyền
+    const [check] = await db.query(
+      `SELECT ID FROM Projects WHERE ID = ? AND MANAGER_ID = ?`,
+      [projectId, userId]
+    );
+    if (check.length === 0) {
+      return res.status(403).json({ message: 'Permission denied' });
+    }
+
+    // Cập nhật
+    await db.query(
+      `UPDATE Projects SET 
+        project_name = ?, 
+        project_description = ?, 
+        project_state = ?, 
+        is_archive = ?, 
+        label = ?, 
+        start_date = ?, 
+        end_date = ?, 
+        complete_date = ?
+       WHERE ID = ?`,
+      [project_name, project_description, project_state, is_archive, label, start_date, end_date, complete_date, projectId]
+    );
+
+    const [updated] = await db.query(`SELECT * FROM Projects WHERE ID = ?`, [projectId]);
+    res.json(updated[0]);
+  } catch (err) {
+    console.error('Error updating project:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /projects/archived
+router.get('/archived', async (req, res) => {
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+
+  try {
+    const [rows] = await db.query(
+      `SELECT 
+         p.ID, p.project_name, p.project_description, p.label, 
+         DATE_FORMAT(p.start_date, '%Y-%m-%d') AS start_date,
+         DATE_FORMAT(p.end_date, '%Y-%m-%d') AS end_date,
+         u.username AS manager_username
+       FROM Projects p
+       JOIN Users u ON p.MANAGER_ID = u.ID
+       LEFT JOIN Project_members pm ON pm.PROJECT_ID = p.ID
+       WHERE (p.MANAGER_ID = ? OR pm.MEMBER_ID = ?) AND p.is_archive = 1
+       GROUP BY p.ID
+       ORDER BY p.start_date DESC`,
+      [userId, userId]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching archived projects:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// PATCH /projects/:id/restore
+router.patch('/:id/restore', async (req, res) => {
+  const userId = req.session.userId;
+  const projectId = req.params.id;
+
+  if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+
+  try {
+    const [result] = await db.query(
+      `UPDATE Projects SET is_archive = 0 WHERE ID = ? AND MANAGER_ID = ?`,
+      [projectId, userId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Project not found or no permission' });
+    }
+
+    res.json({ message: 'Project restored' });
+  } catch (err) {
+    console.error('Restore error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /projects/:projectId/members
+router.post('/:projectId/members', async (req, res) => {
+  const { projectId } = req.params;
+  const { userIdToAdd } = req.body;
+  if (!checkAuth(req)) return res.status(401).json({ message: 'Not authenticated' });
+
+  try {
+    await db.query(
+      `INSERT INTO Project_members (PROJECT_ID, MEMBER_ID) VALUES (?, ?)`,
+      [projectId, userIdToAdd]
+    );
+    res.status(201).json({ message: 'Member added' });
+  } catch (err) {
+    console.error('Add member error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// DELETE /projects/:projectId/leave
+router.delete('/:projectId/leave', async (req, res) => {
+  const { projectId } = req.params;
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+
+  try {
+    const [check] = await db.query(
+      `SELECT COUNT(*) AS taskCount FROM Tasks WHERE PROJECT_ID = ? AND PERFORMER_ID = ? AND is_archive = 0`,
+      [projectId, userId]
+    );
+
+    if (check[0].taskCount > 0) {
+      return res.status(400).json({ message: 'Bạn không thể rời danh sách vì vẫn còn task được giao.' });
+    }
+
+    await db.query(
+      `DELETE FROM Project_members WHERE PROJECT_ID = ? AND MEMBER_ID = ?`,
+      [projectId, userId]
+    );
+
+    res.json({ message: 'Đã rời khỏi danh sách' });
+  } catch (err) {
+    console.error('Leave error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /projects/:projectId/members-with-task-count
+router.get('/:projectId/members-with-task-count', async (req, res) => {
+  if (!checkAuth(req)) return res.status(401).json({ message: 'Not authenticated' });
+
+  const { projectId } = req.params;
+
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        u.ID, u.username, u.user_fullname, 
+        COUNT(t.ID) AS task_count
+      FROM Project_members pm
+      JOIN Users u ON u.ID = pm.MEMBER_ID
+      LEFT JOIN Tasks t ON t.PERFORMER_ID = u.ID AND t.PROJECT_ID = ?
+      WHERE pm.PROJECT_ID = ?
+      GROUP BY u.ID
+    `, [projectId, projectId]);
+
+    res.json(rows);
+  } catch (err) {
+    console.error('Lỗi lấy thành viên + task:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// DELETE /projects/:projectId/members/:memberId
+router.delete('/:projectId/members/:memberId', async (req, res) => {
+  if (!checkAuth(req)) return res.status(401).json({ message: 'Not authenticated' });
+
+  const { projectId, memberId } = req.params;
+
+  try {
+    const [[{ taskCount }]] = await db.query(`
+      SELECT COUNT(*) AS taskCount 
+      FROM Tasks 
+      WHERE PERFORMER_ID = ? AND PROJECT_ID = ?
+    `, [memberId, projectId]);
+
+    if (taskCount > 0) {
+      return res.status(400).json({ message: 'Không thể xóa. Người này vẫn còn công việc.' });
+    }
+
+    await db.query(`
+      DELETE FROM Project_members 
+      WHERE PROJECT_ID = ? AND MEMBER_ID = ?
+    `, [projectId, memberId]);
+
+    res.json({ message: 'Đã xóa thành viên.' });
+  } catch (err) {
+    console.error('Lỗi xóa thành viên:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });

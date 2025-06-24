@@ -4,55 +4,74 @@ import axios from '../services/api';
 import KanbanView from './KanbanView';
 import CalendarView from './CalendarView';
 import TimelineView from './TimeLineView';
+import Drawer from '../components/Drawer';
+import ProjectForm from '../components/ProjectForm.jsx';
 import '../styles/ProjectDetailPage.css';
+import { MdViewKanban, MdCalendarMonth, MdTimeline } from 'react-icons/md';
 
-const TABS = ['kanban', 'list', 'calendar', 'timeline'];
+const TABS = [
+  { label: 'Xem trên bảng', icon: <MdViewKanban size={20} style={{ verticalAlign: 'middle' }} /> },
+  { label: 'Xem trên lịch', icon: <MdCalendarMonth size={20} style={{ verticalAlign: 'middle' }} /> },
+  { label: 'Dòng thời gian', icon: <MdTimeline size={20} style={{ verticalAlign: 'middle' }} /> }
+];
 
 export default function ProjectDetailPage() {
   const { projectId } = useParams();
   const [project, setProject] = useState(null);
-  const [activeTab, setActiveTab] = useState('kanban');
+  const [showDrawer, setShowDrawer] = useState(false);
+  const [editingProject, setEditingProject] = useState(null);
 
   useEffect(() => {
+    refetchProject();
+  }, [projectId]);
+
+  const refetchProject = () => {
     axios.get(`/projects/${projectId}`)
       .then(res => setProject(res.data))
-      .catch(err => console.error('Failed to load project', err));
-  }, [projectId]);
+      .catch(err => console.error('Failed to reload project', err));
+  }
+
+  const [activeTab, setActiveTab] = useState(TABS[0].label);
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'kanban': return <KanbanView project={project} />;
-      case 'list': return <ListView project={project} />;
-      case 'calendar': return <CalendarView project={project} />;
-      case 'timeline': return <TimelineView project={project} />;
+      case 'Xem trên bảng': return <KanbanView project={project} />;
+      case 'Xem trên lịch': return <CalendarView project={project} />;
+      case 'Dòng thời gian': return <TimelineView project={project} />;
       default: return null;
     }
   };
 
-  if (!project) return <div className="project-detail-page">Đang tải thông tin dự án...</div>;
+  const openEditDrawer = (project) => {
+    setEditingProject(project);
+    setShowDrawer(true);
+  };
+
+  const closeDrawer = () => setShowDrawer(false);
+
+  if (!project) return <div className="project-detail-page">Đang tải thông tin danh sách...</div>;
 
   return (
     <div className="project-detail-page">
       <div className="project-header">
-        <h1>{project.project_name}</h1>
-        <div className="project-meta">
-          Quản lý: {project.manager_username} | Ngày bắt đầu: {project.start_date} | Ngày kết thúc: {project.end_date}
-        </div>
-        <div className="project-tags">
+        <h3>{project.project_name}</h3>
+        {/* <div className="project-tags">
           {project.labels?.split(',').map((label, i) => (
             <span key={i}>{label.trim()}</span>
           ))}
-        </div>
+        </div> */}
+        <button onClick={() => openEditDrawer(project)} className="edit-btn">Thông tin</button>
       </div>
 
       <div className="project-tabs">
         {TABS.map(tab => (
           <div
-            key={tab}
-            className={`project-tab ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab)}
+            key={tab.label}
+            className={`project-tab ${activeTab === tab.label ? 'active' : ''}`}
+            onClick={() => setActiveTab(tab.label)}
           >
-            {tab.toUpperCase()}
+            <span style={{ marginRight: 6 }}>{tab.icon}</span>
+            {tab.label.toUpperCase()}
           </div>
         ))}
       </div>
@@ -60,6 +79,16 @@ export default function ProjectDetailPage() {
       <div className="project-view-container">
         {renderTabContent()}
       </div>
+      <Drawer isOpen={showDrawer} onClose={closeDrawer}>
+        <ProjectForm
+          project={editingProject}
+          onSuccess={() => {
+            closeDrawer();
+            reloadProjectList();
+          }}
+          onCancel={closeDrawer}
+        />
+      </Drawer>
     </div>
   );
 }

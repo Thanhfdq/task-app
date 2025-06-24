@@ -12,8 +12,8 @@ function TaskForm({ task = {} }) {
         task_name: '',
         task_description: '',
         label: '',
-        start_date: '',
-        end_date: '',
+        start_date: new Date().toISOString(),
+        end_date: new Date().toISOString(),
         progress: 0,
         PERFORMER_ID: user.id,
         PROJECT_ID: null,
@@ -22,12 +22,25 @@ function TaskForm({ task = {} }) {
 
     const [performers, setPerformers] = useState([]);
     const [groups, setGroups] = useState([]);
-    console.log("Project id: " + formData.PROJECT_ID);
+    console.log("TaskForm initialized with task:", selectedTask);
 
 
     useEffect(() => {
         if (task) {
-            setFormData(prev => ({ ...prev, ...task }));
+            const safeTask = {
+                ID: task.ID,
+                task_name: task.task_name || '',
+                task_description: task.task_description || '',
+                label: task.label || '',
+                start_date: task.start_date || '',
+                end_date: task.end_date || '',
+                progress: task.progress || 0,
+                PERFORMER_ID: task.PERFORMER_ID || user.id,
+                PROJECT_ID: task.PROJECT_ID || null,
+                GROUP_ID: task.GROUP_ID || null,
+                task_state: task.task_state || false
+            };
+            setFormData(prev => ({ ...prev, ...safeTask }));
         }
     }, [task]);
 
@@ -42,19 +55,13 @@ function TaskForm({ task = {} }) {
         }
     }, [formData.PROJECT_ID]);
 
-    useEffect(() => {
-        if (!formData.PROJECT_ID && user?.id) {
-            setFormData(prev => ({
-                ...prev,
-                PERFORMER_ID: user.id
-            }));
-        }
-    }, [formData.PROJECT_ID, user?.id]);
-
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        console.log(formData);
+        setFormData(prev => {
+            const updated = { ...prev, [name]: value };
+            console.log("Changed:", name, value);
+            return updated;
+        });
     };
 
     const handleSubmit = async (e) => {
@@ -66,6 +73,8 @@ function TaskForm({ task = {} }) {
         };
 
         console.log("This is the final performer: " + cleanFormData.PERFORMER_ID);
+        console.log("✅ cleanFormData:", cleanFormData);
+
         if (formData.ID) {
             await axios.put(`/tasks/${formData.ID}`, cleanFormData);
         } else {
@@ -98,99 +107,134 @@ function TaskForm({ task = {} }) {
 
     return (
         <form className="task-form" onSubmit={handleSubmit}>
-            <div className="task-form-header">
-                <input
-                    type="text"
-                    name="task_name"
-                    value={formData.task_name}
-                    onChange={handleChange}
-                    placeholder="Tên công việc"
-                    className="task-title-input"
-                />
-                <div className="task-meta-top">
-                    <span>Trong dự án: <strong>{task?.project_name || 'Không có dự án'}</strong></span>
+            <div className="task-form-grid">
+
+                {/* Cột trái: 7 phần */}
+                <div className="task-left">
+
+                    <div className="task-form-header">
+                        <div className="task-title-wrapper">
+                            <input
+                                type="checkbox"
+                                checked={!!formData.task_state}
+                                onChange={() =>
+                                    setFormData(prev => ({ ...prev, task_state: !prev.task_state }))
+                                }
+                                style={{ marginRight: '10px' }}
+                            />
+                            <input
+                                type="text"
+                                name="task_name"
+                                value={formData.task_name}
+                                onChange={handleChange}
+                                placeholder="Tên công việc"
+                                className="task-title-input"
+                            />
+                        </div>
+                        <div className="task-meta-top">
+                            <span>Trong danh sách: <strong>{task?.project_name || 'Không có danh sách'}</strong></span>
+                        </div>
+                    </div>
+
+                    <div className="task-form-body">
+                        <section className="task-section">
+                            <label>Mô tả</label>
+                            <textarea
+                                name="task_description"
+                                value={formData.task_description}
+                                onChange={handleChange}
+                                placeholder="Thêm mô tả chi tiết..."
+                            />
+                        </section>
+                        <section className="task-section">
+                            <label>Thẻ (Label)</label>
+                            <input
+                                type="text"
+                                name="label"
+                                value={formData.label}
+                                onChange={handleChange}
+                                placeholder="VD: thiết kế, gấp, cần review"
+                            />
+                        </section>
+
+                    </div>
+                </div>
+
+                {/* Cột phải: 3 phần */}
+                <div className="task-right">
+                    <div className="task-form-body">
+
+                        <section className="task-section">
+                            <label>Tiến độ (%)</label>
+                            <input
+                                type="number"
+                                name="progress"
+                                min="0"
+                                max="100"
+                                value={formData.progress}
+                                onChange={handleChange}
+                            />
+                        </section>
+
+                        <section className="task-section">
+                            <label>Ngày bắt đầu</label>
+                            <input
+                                type="date"
+                                name="start_date"
+                                value={formatDateForInput(formData.start_date)}
+                                onChange={handleChange}
+                            />
+                        </section>
+
+                        <section className="task-section">
+                            <label>Ngày kết thúc</label>
+                            <input
+                                type="date"
+                                name="end_date"
+                                value={formatDateForInput(formData.end_date)}
+                                onChange={handleChange}
+                            />
+                        </section>
+
+                        <section className="task-section">
+                            <label>Người thực hiện</label>
+                            {formData.PROJECT_ID ? (
+                                <select name="PERFORMER_ID" value={formData.PERFORMER_ID || ''} onChange={handleChange}>
+                                    <option value="">-- Chọn người --</option>
+                                    {performers.map(p =>
+                                        <option key={p.ID} value={p.ID}>{p.username}</option>
+                                    )}
+                                </select>
+                            ) : (
+                                <p>{user.username}</p>
+                            )}
+                        </section>
+
+                        {formData.PROJECT_ID && (
+                            <section className="task-section">
+                                <label>Nhóm</label>
+                                <select name="GROUP_ID" value={formData.GROUP_ID || ''} onChange={handleChange}>
+                                    <option value="">-- Chọn nhóm --</option>
+                                    {groups.map(g =>
+                                        <option key={g.ID} value={g.ID}>{g.group_name}</option>
+                                    )}
+                                </select>
+                            </section>
+                        )}
+
+                        <div className="task-form-actions">
+                            <button type="button" className="archive-btn" onClick={handleArchive}>📦 Lưu trữ</button>
+                            <button type="button" className="delete-btn" onClick={handleDelete}>🗑 Xóa</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div className="task-form-body">
-                <section className="task-section">
-                    <label>Mô tả</label>
-                    <textarea
-                        name="task_description"
-                        value={formData.task_description}
-                        onChange={handleChange}
-                        placeholder="Thêm mô tả chi tiết..."
-                    />
-                </section>
-
-                <section className="task-section">
-                    <label>Thẻ (Label)</label>
-                    <input
-                        type="text"
-                        name="label"
-                        value={formData.label}
-                        onChange={handleChange}
-                        placeholder="VD: thiết kế, gấp, cần review"
-                    />
-                </section>
-
-                <section className="task-section">
-                    <label>Tiến độ (%)</label>
-                    <input
-                        type="number"
-                        name="progress"
-                        min="0"
-                        max="100"
-                        value={formData.progress}
-                        onChange={handleChange}
-                    />
-                </section>
-
-                <section className="task-section">
-                    <label>Ngày bắt đầu</label>
-                    <input
-                        type="date"
-                        name="start_date"
-                        value={formatDateForInput(formData.start_date)}
-                        onChange={handleChange}
-                    />
-                </section>
-
-                <section className="task-section">
-                    <label>Ngày kết thúc</label>
-                    <input
-                        type="date"
-                        name="end_date"
-                        value={formatDateForInput(formData.end_date)}
-                        onChange={handleChange}
-                    />
-                </section>
-
-                <section className="task-section">
-                    <label>Người thực hiện</label>
-                    {formData.PROJECT_ID ? (
-                        <select name="PERFORMER_ID" value={formData.PERFORMER_ID || ''} onChange={handleChange}>
-                            <option value="">-- Chọn người --</option>
-                            {performers.map(p =>
-                                <option key={p.ID} value={p.ID}>{p.username}</option>
-                            )}
-                        </select>
-                    ) : (
-                        <p>{user.username}</p>
-                    )}
-                </section>
-
-                <button type="submit">
-                    {selectedTask !== null ? 'Lưu thay đổi' : 'Tạo mới'}
-                </button>
-                {selectedTask !== null && (
-                    <div className="task-form-actions">
-                        <button type="button" className="archive-btn" onClick={handleArchive}>📦 Lưu trữ</button>
-                        <button type="button" className="delete-btn" onClick={handleDelete}>🗑 Xóa</button>
-                    </div>
-                )}
-            </div>
+            <button type="submit">
+                {selectedTask !== null ? 'Lưu thay đổi' : 'Tạo mới'}
+            </button>
         </form>
+
 
     );
 }

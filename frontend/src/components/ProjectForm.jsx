@@ -1,0 +1,133 @@
+import React, { useState, useEffect } from 'react';
+import { format } from 'date-fns';
+import axios from '../services/api';
+import ProjectMembersPanel from '../components/ProjectMembersPanel.jsx';
+import { useUser } from '../contexts/UserContext';
+import '../styles/ProjectForm.css'; // thêm CSS nếu cần
+import { FaPen, FaPlus, FaUser } from 'react-icons/fa';
+
+export default function ProjectForm({ project = null, onSuccess, onCancel }) {
+
+    const [showMemberDrawer, setShowMemberDrawer] = useState(false);
+    const { user } = useUser();
+
+    const [formData, setFormData] = useState({
+        project_name: '',
+        project_description: '',
+        start_date: '',
+        end_date: '',
+        complete_date: '',
+        label: '',
+        is_archive: false,
+        project_state: false
+    });
+
+    useEffect(() => {
+        if (project) {
+            setFormData({
+                project_name: project.project_name || '',
+                project_description: project.project_description || '',
+                start_date: project.start_date || '',
+                end_date: project.end_date || '',
+                complete_date: project.complete_date || null,
+                label: project.label || '',
+                is_archive: project.is_archive || false,
+                project_state: project.project_state || false
+            });
+        }
+        console.log("ProjectForm initialized with project:", project);
+    }, [project]);
+
+
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const cleanFormData = {
+            ...formData,
+            start_date: formData.start_date ? format(new Date(formData.start_date), 'yyyy-MM-dd') : null,
+            end_date: formData.end_date ? format(new Date(formData.end_date), 'yyyy-MM-dd') : null,
+            complete_date: formData.complete_date ? format(new Date(formData.complete_date), 'yyyy-MM-dd') : null
+        };
+        console.log('📝 Project form data:', cleanFormData);
+        try {
+            if (project) {
+                await axios.put(`/projects/${project.ID}`, cleanFormData);
+            } else {
+                const res = await axios.post('/projects', cleanFormData);
+                const newProject = res.data;
+
+                // 👇 Thêm user hiện tại vào project mới
+                await axios.post(`/projects/${newProject.ID}/members`, {
+                    userIdToAdd: user.id
+                });
+            }
+            onSuccess();
+        } catch (err) {
+            console.error('Failed to save project:', err);
+            alert('Đã có lỗi xảy ra');
+        }
+    };
+
+    return (
+        <div className="project-form-container">
+            <form className="project-form" onSubmit={handleSubmit}>
+                <h2>{project ? 'Chỉnh sửa danh sách' : 'Tạo mới danh sách'}</h2>
+
+                <label>Tên danh sách:</label>
+                <input name="project_name" value={formData.project_name} onChange={handleChange} required />
+
+                <label>Mô tả:</label>
+                <textarea name="project_description" value={formData.project_description} onChange={handleChange} />
+                <button type="button" onClick={() => setShowMemberDrawer(true)} className="member_btn"><FaUser style={{ fontSize: '1rem' }} /> Thành viên</button>
+                <label>Ngày bắt đầu:</label>
+                <input type="date" name="start_date" value={formData.start_date} onChange={handleChange} required />
+
+                <label>Ngày kết thúc:</label>
+                <input type="date" name="end_date" value={formData.end_date} onChange={handleChange} />
+
+                <label>Ngày hoàn thành:</label>
+                <input type="date" name="complete_date" value={formData.complete_date} onChange={handleChange} />
+
+                <label>Nhãn:</label>
+                <input name="label" value={formData.label} onChange={handleChange} />
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="project_state"
+                        checked={formData.project_state}
+                        onChange={handleChange}
+                    />
+                    danh sách đã đóng
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="is_archive"
+                        checked={formData.is_archive}
+                        onChange={handleChange}
+                    />
+                    Lưu trữ
+                </label>
+
+                <div className="project-form-buttons">
+                    <button type="submit">{project ? 'Lưu' : 'Tạo mới'}</button>
+                    {onCancel && <button type="button" onClick={onCancel}>Hủy</button>}
+                </div>
+            </form>
+            <ProjectMembersPanel
+                isOpen={showMemberDrawer}
+                onClose={() => setShowMemberDrawer(false)}
+                projectId={project ? project.ID : null}
+            />
+        </div>
+    );
+}

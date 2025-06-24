@@ -1,18 +1,15 @@
 .layout {
   display: flex;
   height: 100vh;
-  font-family: sans-serif;
 }
 
 .main {
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: auto;
 }
 
 .content {
   flex: 1;
-  overflow-y: auto;
-  padding: 16px 24px;
-  background-color: #f9f9f9;
 }

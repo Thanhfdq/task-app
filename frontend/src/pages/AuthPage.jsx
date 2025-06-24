@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import axios from "../services/api";
+import '../styles/AuthForm.css';
 
 export default function AuthPage({ onAuthSuccess }) {
     const [isRegistering, setIsRegistering] = useState(false);
@@ -15,7 +16,6 @@ export default function AuthPage({ onAuthSuccess }) {
 
     const handleSubmit = async e => {
         e.preventDefault();
-        console.log('📝 Form data:', form);
         try {
             const endpoint = isRegistering ? "/register" : "/login";
             const res = await axios.post(`/auth${endpoint}`, form, {
@@ -23,40 +23,47 @@ export default function AuthPage({ onAuthSuccess }) {
             });
             if (res.data && res.data.success) {
                 localStorage.setItem('user', JSON.stringify(res.data.user));
-                onAuthSuccess(res.data.user); // navigate to main screen
+                onAuthSuccess(res.data.user);
                 navigate('/tasks');
             } else {
                 alert("Login/Register failed.");
             }
         } catch (err) {
-            alert("Error: " + err.response?.data?.message || err.message);
+            alert("Error: " + (err.response?.data?.message || err.message));
         }
     };
 
     return (
-        <div>
-            <h2>{isRegistering ? "Register" : "Login"}</h2>
-            <form onSubmit={handleSubmit}>
-                <input
-                    name="username"
-                    value={form.username}
-                    onChange={handleChange}
-                    placeholder="Username"
-                    required
-                />
-                <input
-                    type="password"
-                    name="password"
-                    value={form.password}
-                    onChange={handleChange}
-                    placeholder="Password"
-                    required
-                />
-                <button type="submit">{isRegistering ? "Register" : "Login"}</button>
-            </form>
-            <button onClick={toggleForm}>
-                {isRegistering ? "Already have an account? Login" : "New here? Register"}
-            </button>
+        <div className="auth-container">
+            <h3 className="login-app-name">Task Management</h3>
+            <div className="auth-box">
+                <h2>{isRegistering ? "Tạo tài khoản mới" : "Chào mừng trở lại"}</h2>
+                <form className="auth-form" onSubmit={handleSubmit}>
+                    <input
+                        name="username"
+                        value={form.username}
+                        onChange={handleChange}
+                        placeholder="Tên đăng nhập"
+                        required
+                    />
+                    <input
+                        type="password"
+                        name="password"
+                        value={form.password}
+                        onChange={handleChange}
+                        placeholder="Mật khẩu"
+                        required
+                    />
+                    <button type="submit" className="primary-button">
+                        {isRegistering ? "Đăng ký" : "Đăng nhập"}
+                    </button>
+                </form>
+                <button className="switch-button" onClick={toggleForm}>
+                    {isRegistering
+                        ? "Đã có tài khoản? Đăng nhập"
+                        : "Chưa có tài khoản? Đăng ký"}
+                </button>
+            </div>
         </div>
     );
 }

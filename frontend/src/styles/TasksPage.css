@@ -1,6 +1,7 @@
 .tasks-page {
   padding: 20px;
-  font-family: sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .task-toolbar {
