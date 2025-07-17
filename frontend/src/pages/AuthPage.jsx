@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import axios from "../services/api";
+import api from "../services/api";
 import '../styles/AuthForm.css';
 
 export default function AuthPage({ onAuthSuccess }) {
@@ -18,13 +18,13 @@ export default function AuthPage({ onAuthSuccess }) {
         e.preventDefault();
         try {
             const endpoint = isRegistering ? "/register" : "/login";
-            const res = await axios.post(`/auth${endpoint}`, form, {
+            const res = await api.post(`/auth${endpoint}`, form, {
                 withCredentials: true
             });
             if (res.data && res.data.success) {
                 localStorage.setItem('user', JSON.stringify(res.data.user));
                 onAuthSuccess(res.data.user);
-                navigate('/tasks');
+                navigate('/projects');
             } else {
                 alert("Login/Register failed.");
             }
@@ -39,6 +39,22 @@ export default function AuthPage({ onAuthSuccess }) {
             <div className="auth-box">
                 <h2>{isRegistering ? "Tạo tài khoản mới" : "Chào mừng trở lại"}</h2>
                 <form className="auth-form" onSubmit={handleSubmit}>
+                    {isRegistering && (
+                        <section>
+                            <input
+                                name="user_fullname"
+                                value={form.user_fullname}
+                                onChange={handleChange}
+                                placeholder="Tên người dùng"
+                            />
+                            <input
+                                name="user_description"
+                                value={form.user_description}
+                                onChange={handleChange}
+                                placeholder="Thông tin chi tiết"
+                            />
+                        </section>
+                    )}
                     <input
                         name="username"
                         value={form.username}

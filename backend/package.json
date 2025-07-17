@@ -19,5 +19,12 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.3"
+  },
+  "bin": "dist/index.js",
+  "pkg": {
+    "targets": [
+      "node18-win-x64"
+    ],
+    "outputPath": "dist"
   }
 }

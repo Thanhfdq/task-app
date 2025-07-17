@@ -17,9 +17,13 @@ router.post('/register', async (req, res) => {
             [username, hashedPassword, user_fullname, user_description]
         );
 
-        res.status(201).json({success:true, message: 'User registered successfully' , user: { username: username }});
+        const [users] = await db.query('SELECT * FROM Users WHERE username = ?', [username]);
+        const user = users[0];
+        // Save session
+        req.session.userId = user.ID;
+        res.status(201).json({ success: true, message: 'User registered successfully', user: { id: user.ID, username: user.username, fullname: user.user_fullname, description: user.user_description } });
     } catch (err) {
-        res.status(500).json({success:false, message: 'Server error', error: err });
+        res.status(500).json({ success: false, message: 'Server error', error: err });
     }
 });
 
@@ -37,9 +41,9 @@ router.post('/login', async (req, res) => {
 
         // Save session
         req.session.userId = user.ID;
-        res.status(200).json({success: true, message: 'Login successful', user: { id: user.ID, username: user.username } });
+        res.status(200).json({ success: true, message: 'Login successful', user: { id: user.ID, username: user.username, fullname: user.user_fullname, description: user.user_description } });
     } catch (err) {
-        res.status(500).json({success: false, message: 'Server error', error: err });
+        res.status(500).json({ success: false, message: 'Server error', error: err });
     }
 });
 

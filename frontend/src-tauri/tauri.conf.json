@@ -7,12 +7,12 @@
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:5173",
     "beforeBuildCommand": "npm run build",
-    "frontendDist": "../frontend/dist"
+    "frontendDist": "../dist"
   },
   "app": {
     "windows": [
       {
-        "title": "task-app",
+        "title": "Quản lý công việc",
         "width": 800,
         "height": 600
       }

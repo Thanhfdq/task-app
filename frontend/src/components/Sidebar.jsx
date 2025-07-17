@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTaskModal } from '../contexts/TaskModalContext';
+import { UserProvider, useUser } from '../contexts/UserContext';
 import {
   FaTasks,
   FaProjectDiagram,
@@ -10,20 +11,25 @@ import {
   FaPlus,
   FaSearch,
 } from 'react-icons/fa';
+import {
+  TbLayoutSidebarRightCollapse,
+  TbLayoutSidebarRightExpand,
+} from 'react-icons/tb'
 import '../styles/Sidebar.css';
 
 export default function Sidebar({ projects = [] }) {
   const [collapsed, setCollapsed] = useState(false);
   const toggleSidebar = () => setCollapsed(!collapsed);
   const { openModalForNewTask } = useTaskModal();
+  const {user} = useUser();
 
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header">
+        {!collapsed && <h3 className="app-title">{user.fullname}</h3>}
         <button className="toggle-button" onClick={toggleSidebar}>
-          {collapsed ? <FaChevronRight /> : <FaChevronLeft />}
+          {collapsed ? <TbLayoutSidebarRightCollapse /> : <TbLayoutSidebarRightExpand />}
         </button>
-        {!collapsed && <h3 className="app-title">TaskManager</h3>}
       </div>
 
       <nav className="sidebar-nav">
@@ -32,15 +38,15 @@ export default function Sidebar({ projects = [] }) {
           end_date: new Date().toISOString().substring(0, 10)
         })}>
           <FaPlus />
-          {!collapsed && <span>Công việc mới</span>}
+          {!collapsed && <span>Tạo công việc mới</span>}
         </button>
         <Link to="/projects" className="nav-item">
           <FaProjectDiagram />
-          {!collapsed && <span>Danh sách</span>}
+          {!collapsed && <span>Tất cả danh sách</span>}
         </Link>
         <Link to="/tasks" className="nav-item">
           <FaTasks />
-          {!collapsed && <span>Công việc</span>}
+          {!collapsed && <span>Tất cả công việc</span>}
         </Link>
       </nav>
 

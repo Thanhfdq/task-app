@@ -6,7 +6,7 @@ import Drawer from '../components/Drawer';
 import ProjectForm from '../components/ProjectForm.jsx';
 import { FaPen, FaPlus } from 'react-icons/fa';
 
-function ProjectsPage({ user }) {
+function ProjectsPage() {
     const [showDrawer, setShowDrawer] = useState(false);
     const [editingProject, setEditingProject] = useState(null);
     const [projects, setProjects] = useState([]);
