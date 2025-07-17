@@ -178,6 +178,7 @@ router.get('/:projectId/members', async (req, res) => {
   }
 });
 
+// GET /projects/:projectId/groups - Get all task groups in a project
 router.get('/:projectId/groups', async (req, res) => {
   if (!checkAuth(req)) return res.status(401).json({ message: 'Not authenticated' });
 
@@ -198,6 +199,22 @@ router.get('/:projectId/groups', async (req, res) => {
   }
 });
 
+// PATCH /projects/:projectId/groups/:groupId - Rename a task group
+router.patch('/:projectId/groups/:groupId', async (req, res) => {
+  if (!checkAuth(req)) return res.status(401).json({ message: 'Not authenticated' });
+  const { name } = req.body;
+  const { projectId, groupId } = req.params;
+  try {
+    await db.query('UPDATE Task_groups SET group_name = ? WHERE ID = ? AND PROJECT_ID = ?', [name, groupId, projectId]);
+    res.sendStatus(200);
+  } catch (err) {
+    console.error('Rename group error:', err);
+    res.status(500).json({ message: 'Rename failed' });
+  }
+});
+
+
+// POST /projects/:projectId/groups - Create a new task group in a project
 router.post('/:projectId/groups', async (req, res) => {
   if (!checkAuth(req)) return res.status(401).json({ message: 'Not authenticated' });
 

@@ -12,6 +12,10 @@ export default function KanbanView({ project }) {
     const [openMenuColId, setOpenMenuColId] = useState(null);
     const inputRef = useRef(null);
     const menuRef = useRef(null);
+
+    const [editingGroupId, setEditingGroupId] = useState(null);
+    const [editingGroupName, setEditingGroupName] = useState('');
+
     const { openModalForNewTask, openModalForEditTask, taskRefreshToken, triggerTaskRefresh } = useTaskModal();
 
     // Optional: close menu when clicking outside
@@ -83,7 +87,6 @@ export default function KanbanView({ project }) {
         return '#fff'; // ✅ ok - white
     };
 
-
     const handleDragOver = (e) => {
         e.preventDefault();
     };
@@ -132,6 +135,22 @@ export default function KanbanView({ project }) {
         }
     };
 
+    const handleRenameGroup = async (groupId) => {
+        if (!editingGroupName.trim()) return;
+
+        try {
+            await axios.patch(`/projects/${project.ID}/groups/${groupId}`, {
+                name: editingGroupName.trim()
+            });
+            setEditingGroupId(null);
+            setEditingGroupName('');
+            loadColumnsAndTasks();
+            triggerTaskRefresh();
+        } catch (err) {
+            console.error("Failed to rename group:", err);
+        }
+    };
+
     const handleRemoveColumn = async (colId) => {
         try {
             await axios.delete(`/projects/${project.ID}/groups/${colId}`);
@@ -173,7 +192,35 @@ export default function KanbanView({ project }) {
                         onDragOver={handleDragOver}
                         onDrop={(e) => handleDrop(e, col.ID)}>
                         <div className="kanban-column-header" style={{ position: 'relative' }}>
-                            <h4>{col.group_name}</h4>
+                            {/* Editable column name */}
+                            {editingGroupId === col.ID ? (
+                                <input
+                                    value={editingGroupName}
+                                    onChange={(e) => setEditingGroupName(e.target.value)}
+                                    onBlur={() => handleRenameGroup(col.ID)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            handleRenameGroup(col.ID);
+                                        } else if (e.key === 'Escape') {
+                                            setEditingGroupId(null);
+                                            setEditingGroupName('');
+                                        }
+                                    }}
+                                    autoFocus
+                                    style={{ fontSize: '1rem', fontWeight: 'bold', padding: '2px 4px' }}
+                                />
+                            ) : (
+                                <h4
+                                    onClick={() => {
+                                        setEditingGroupId(col.ID);
+                                        setEditingGroupName(col.group_name);
+                                    }}
+                                    style={{ cursor: 'pointer' }}
+                                    title="Click để đổi tên"
+                                >
+                                    {col.group_name}
+                                </h4>
+                            )}
                             <span>{tasksByColumn[col.ID]?.length || 0}</span>
                             <button
                                 className="kanban-more-btn"
