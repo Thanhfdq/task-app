@@ -187,6 +187,22 @@ router.patch('/:id/archive', async (req, res) => {
   }
 });
 
+// PATCH /tasks/:id/restore Restore a task
+router.patch('/:id/restore', async (req, res) => {
+  const userId = req.session.userId;
+  const taskId = req.params.id;
+
+  if (!userId) return res.status(401).json({ message: 'Not authenticated' });
+
+  try {
+    await db.query('UPDATE tasks SET is_archive = 0 WHERE ID = ?', [taskId]);
+    res.json({ message: 'Task restored successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to restore task' });
+  }
+});
+
 // Delete a task
 router.delete('/:id', async (req, res) => {
   const userId = req.session.userId;

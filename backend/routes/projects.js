@@ -102,7 +102,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /projects/:projectId/tasks - Lấy danh sách task thuộc danh sách
+// GET /projects/:projectId/tasks - Lấy danh sách task thuộc danh sách (Không lưu trữ)
 router.get('/:projectId/tasks', async (req, res) => {
   if (!checkAuth(req)) return res.status(401).json({ message: 'Not authenticated' });
 
@@ -119,6 +119,33 @@ router.get('/:projectId/tasks', async (req, res) => {
        FROM Tasks 
        LEFT JOIN Users ON Tasks.PERFORMER_ID = Users.ID
        WHERE Tasks.PROJECT_ID = ? AND Tasks.is_archive = 0`,
+      [projectId]
+    );
+
+    res.json(tasks);
+  } catch (err) {
+    console.error('Error fetching tasks of project:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /projects/:projectId/tasks - Lấy danh sách task thuộc danh sách (đã lưu trữ)
+router.get('/:projectId/tasks/archived', async (req, res) => {
+  if (!checkAuth(req)) return res.status(401).json({ message: 'Not authenticated' });
+
+  const projectId = req.params.projectId;
+
+  try {
+    const [tasks] = await db.query(
+      `SELECT 
+         Tasks.*,
+         DATE_FORMAT(Tasks.start_date, '%Y-%m-%d') AS start_date,
+         DATE_FORMAT(Tasks.end_date, '%Y-%m-%d') AS end_date,
+         DATE_FORMAT(Tasks.complete_date, '%Y-%m-%d') AS complete_date,
+         Users.username AS performer_username 
+       FROM Tasks 
+       LEFT JOIN Users ON Tasks.PERFORMER_ID = Users.ID
+       WHERE Tasks.PROJECT_ID = ? AND Tasks.is_archive = 1`,
       [projectId]
     );
 

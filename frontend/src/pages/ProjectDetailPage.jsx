@@ -8,6 +8,7 @@ import Drawer from '../components/Drawer';
 import ProjectForm from '../components/ProjectForm.jsx';
 import '../styles/ProjectDetailPage.css';
 import { MdViewKanban, MdCalendarMonth, MdTimeline } from 'react-icons/md';
+import ArchivedTasksPanel from '../components/ArchivedTasksPanel.jsx';
 
 const TABS = [
   { label: 'Xem trên bảng', icon: <MdViewKanban size={20} style={{ verticalAlign: 'middle' }} /> },
@@ -19,6 +20,7 @@ export default function ProjectDetailPage() {
   const { projectId } = useParams();
   const [project, setProject] = useState(null);
   const [showDrawer, setShowDrawer] = useState(false);
+  const [showArchivedTasksPanel, setShowArchivedTasksPanel] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
 
   useEffect(() => {
@@ -55,12 +57,10 @@ export default function ProjectDetailPage() {
     <div className="project-detail-page">
       <div className="project-header">
         <h3>{project.project_name}</h3>
-        {/* <div className="project-tags">
-          {project.labels?.split(',').map((label, i) => (
-            <span key={i}>{label.trim()}</span>
-          ))}
-        </div> */}
-        <button onClick={() => openEditDrawer(project)} className="edit-btn">Thông tin</button>
+        <section className="project-info">
+          <button onClick={() => openEditDrawer(project)} className="edit-btn">Thông tin</button>
+          <button onClick={() => setShowArchivedTasksPanel(true)} className="archive-btn">Danh sách lưu trữ</button>
+        </section>
       </div>
 
       <div className="project-tabs">
@@ -89,6 +89,11 @@ export default function ProjectDetailPage() {
           onCancel={closeDrawer}
         />
       </Drawer>
+      <ArchivedTasksPanel
+        isOpen={showArchivedTasksPanel}
+        onClose={() => setShowArchivedTasksPanel(false)}
+        projectId={project ? project.ID : null}
+      />
     </div>
   );
 }
