@@ -11,6 +11,7 @@ function TaskForm({ task = {} }) {
     const [formData, setFormData] = useState({
         task_name: '',
         task_description: '',
+        task_state: false,
         label: '',
         start_date: new Date().toISOString(),
         end_date: new Date().toISOString(),

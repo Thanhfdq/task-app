@@ -142,7 +142,7 @@ router.put('/:id', async (req, res) => {
 
   const taskId = req.params.id;
   const allowedFields = [
-    'task_name', 'task_description', 'start_date', 'end_date',
+    'task_name', 'task_description', 'task_state', 'start_date', 'end_date',
     'label', 'progress', 'PERFORMER_ID', 'PROJECT_ID', 'GROUP_ID'
   ];
 

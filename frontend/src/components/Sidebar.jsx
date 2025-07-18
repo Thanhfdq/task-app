@@ -23,6 +23,9 @@ export default function Sidebar({ projects = [] }) {
   const { openModalForNewTask } = useTaskModal();
   const {user} = useUser();
 
+  // Filter out archived projects
+  const notActiveProjects = projects.filter((p) => !p.is_archive);
+
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header">
@@ -61,7 +64,7 @@ export default function Sidebar({ projects = [] }) {
         <div className="sidebar-recent">
           <div className="sidebar-recent-title">Các danh sách</div>
           <ul className="sidebar-recent-list">
-            {projects.map((p) => (
+            {notActiveProjects.map((p) => (
               <li key={p.ID}>
                 <Link to={`/projects/${p.ID}`}>
                   {p.manager_username}/{p.project_name}
