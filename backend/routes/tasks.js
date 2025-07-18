@@ -232,4 +232,25 @@ router.patch('/:id/move', async (req, res) => {
   }
 });
 
+// GET /tasks/:taskId/comments
+router.get('/:taskId/comments', async (req, res) => {
+    const [comments] = await db.query(`
+        SELECT Comments.*, Users.username FROM Comments
+        JOIN Users ON Users.ID = Comments.user_id
+        WHERE task_id = ?
+        ORDER BY created_at ASC
+    `, [req.params.taskId]);
+    res.json(comments);
+});
+
+// POST /tasks/:taskId/comments
+router.post('/:taskId/comments', async (req, res) => {
+    const { content, user_id } = req.body;
+    await db.query(`
+        INSERT INTO Comments (task_id, user_id, content)
+        VALUES (?, ?, ?)
+    `, [req.params.taskId, user_id, content]);
+    res.sendStatus(201);
+});
+
 export default router;

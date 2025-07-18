@@ -21,6 +21,10 @@ function TaskForm({ task = {} }) {
         GROUP_ID: null,
     });
 
+    const [comments, setComments] = useState([]);
+    const [newComment, setNewComment] = useState('');
+    const [projectManagerId, setProjectManagerId] = useState(null);
+
     const [performers, setPerformers] = useState([]);
     const [groups, setGroups] = useState([]);
     console.log("TaskForm initialized with task:", selectedTask);
@@ -50,17 +54,25 @@ function TaskForm({ task = {} }) {
         if (formData.PROJECT_ID) {
             axios.get(`/projects/${formData.PROJECT_ID}/members`).then(res => setPerformers(res.data));
             axios.get(`/projects/${formData.PROJECT_ID}/groups`).then(res => setGroups(res.data));
-        } else {
-            setPerformers([]);
-            setGroups([]);
+            axios.get(`/projects/${formData.PROJECT_ID}`).then(res => setProjectManagerId(res.data.manager_id));
+            console.log("Project manager ID: " + projectManagerId);
         }
     }, [formData.PROJECT_ID]);
+
+    useEffect(() => {
+        if (formData.ID) {
+            axios.get(`/tasks/${formData.ID}/comments`).then(res => setComments(res.data));
+            console.log("List of comments for task ID " + formData.ID + ": ", comments);
+        }
+    }, [formData.ID]);
+
+    const isAllowedToComment = user.id === formData.PERFORMER_ID || user.id === projectManagerId;
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => {
             const updated = { ...prev, [name]: value };
-            console.log("Changed:", name, value);
             return updated;
         });
     };
@@ -73,9 +85,6 @@ function TaskForm({ task = {} }) {
             end_date: formData.end_date ? format(new Date(formData.end_date), 'yyyy-MM-dd') : null,
         };
 
-        console.log("This is the final performer: " + cleanFormData.PERFORMER_ID);
-        console.log("✅ cleanFormData:", cleanFormData);
-
         if (formData.ID) {
             await axios.put(`/tasks/${formData.ID}`, cleanFormData);
         } else {
@@ -83,6 +92,17 @@ function TaskForm({ task = {} }) {
         }
         closeModal();
         triggerTaskRefresh();
+    };
+
+    const handleAddComment = async () => {
+        if (!newComment.trim()) return;
+        await axios.post(`/tasks/${formData.ID}/comments`, {
+            user_id: user.id,
+            content: newComment
+        });
+        setNewComment('');
+        const res = await axios.get(`/tasks/${formData.ID}/comments`);
+        setComments(res.data);
     };
 
     const handleArchive = async () => {
@@ -157,7 +177,25 @@ function TaskForm({ task = {} }) {
                                 placeholder="VD: thiết kế, gấp, cần review"
                             />
                         </section>
-
+                        {/* Comment Section */}
+                        {isAllowedToComment && (
+                            <section className="task-section">
+                                <label>Bình luận</label>
+                                <div className="comment-list">
+                                    {comments.map((c, idx) => (
+                                        <div key={idx} className="comment-item">
+                                            <strong>{c.username}:</strong> {c.content}
+                                        </div>
+                                    ))}
+                                </div>
+                                <textarea
+                                    placeholder="Viết bình luận..."
+                                    value={newComment}
+                                    onChange={(e) => setNewComment(e.target.value)}
+                                />
+                                <button type="button" onClick={handleAddComment}>💬 Gửi bình luận</button>
+                            </section>
+                        )}
                     </div>
                 </div>
 

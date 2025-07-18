@@ -75,6 +75,25 @@
   outline: none;
 }
 
+/* Comments */
+.comment-list {
+  margin-bottom: 12px;
+}
+
+.comment-item {
+  background: #f1f2f4;
+  padding: 10px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #444;
+}
+
+.comment-item strong {
+  color: #222;
+  margin-right: 6px;
+}
+
 .task-form button[type="submit"] {
   margin-top: 16px;
   padding: 12px;
