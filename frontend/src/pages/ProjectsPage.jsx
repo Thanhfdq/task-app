@@ -8,6 +8,7 @@ import { FaPen, FaPlus } from 'react-icons/fa';
 
 function ProjectsPage() {
     const [showDrawer, setShowDrawer] = useState(false);
+    const [showArchived, setShowArchived] = useState(false);
     const [editingProject, setEditingProject] = useState(null);
     const [projects, setProjects] = useState([]);
     const [filtered, setFiltered] = useState([]);
@@ -15,7 +16,7 @@ function ProjectsPage() {
     const [sortBy, setSortBy] = useState('start_date');
     const [sortOrder, setSortOrder] = useState('desc');
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
+    const itemsPerPage = 8;
 
     const openCreateDrawer = () => {
         setEditingProject(null);
@@ -31,18 +32,21 @@ function ProjectsPage() {
 
     const reloadProjectList = () => {
         axios.get('/projects').then(res => {
-            const visibleProjects = res.data.filter(p => !p.is_archive);
-            setProjects(visibleProjects);
+            setProjects(res.data);
         });
         console.log("Projects reloaded:", projects);
     }
 
     useEffect(() => {
         reloadProjectList();
-    }, []);
+    }, [showArchived]);
 
     useEffect(() => {
         let temp = [...projects];
+
+        if (!showArchived) {
+            temp = temp.filter(p => !p.is_archive);
+        }
 
         if (search.trim()) {
             const keyword = search.toLowerCase();
@@ -63,7 +67,7 @@ function ProjectsPage() {
 
         setFiltered(temp);
         setCurrentPage(1); // reset page when filter changes
-    }, [search, sortBy, sortOrder, projects]);
+    }, [search, sortBy, sortOrder, projects, showArchived]);
 
     const totalPages = Math.ceil(filtered.length / itemsPerPage);
     const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -80,7 +84,7 @@ function ProjectsPage() {
                     onChange={e => setSearch(e.target.value)}
                 />
                 <div className="sort-controls">
-                    <p>Sắp xếp theo : </p>
+                    <p>Sắp xếp theo: </p>
                     <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
                         <option value="start_date">Ngày bắt đầu</option>
                         <option value="project_name">Tên danh sách</option>
@@ -91,11 +95,19 @@ function ProjectsPage() {
                         <option value="desc">Giảm dần</option>
                     </select>
                 </div>
+                <label className="archive-toggle">
+                    <input
+                        type="checkbox"
+                        checked={showArchived}
+                        onChange={() => setShowArchived(prev => !prev)}
+                    />
+                    Hiện danh sách đã lưu trữ
+                </label>
             </div>
 
             <ul className="project-list">
                 {paginated.map(p => (
-                    <li key={p.ID} className="project-card">
+                    <li key={p.ID} className={`project-card ${p.is_archive ? 'archived' : ''}`}>
                         <div className="project-card-header">
                             <h3>{p.project_name}</h3>
                             <button onClick={() => openEditDrawer(p)} className="edit-btn"><FaPen style={{ fontSize: '1rem' }} /></button>
@@ -104,7 +116,7 @@ function ProjectsPage() {
                         <p><strong>Ngày bắt đầu:</strong> {p.start_date}</p>
                         <p><strong>Ngày kết thúc:</strong> {p.end_date}</p>
                         <p><strong>Label:</strong> {p.label || 'Không có'}</p>
-                        <p><strong>Trạng thái:</strong> {p.project_state ? 'Đã đóng' : 'Đang mở'}</p>
+                        <p><strong>Trạng thái:</strong> {p.project_state ? 'Đã đóng' : 'Đang mở'}{p.is_archive && '(Lưu trữ)'}</p>
                         <Link to={`/projects/${p.ID}`} className="overlay-link" />
                     </li>
                 ))}

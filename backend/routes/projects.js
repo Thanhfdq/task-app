@@ -24,9 +24,12 @@ router.get('/:id', async (req, res) => {
           u.username as manager_username, u.user_fullname as manager_fullname
         FROM Projects p
         JOIN Users u ON p.MANAGER_ID = u.ID
-        WHERE p.ID = ? AND (p.MANAGER_ID = ? OR EXISTS (
-          SELECT 1 FROM Project_members WHERE PROJECT_ID = p.ID AND member_id = ?
-        )) AND p.is_archive = 0`,
+        WHERE p.ID = ? AND 
+        (p.MANAGER_ID = ? OR EXISTS 
+          (
+            SELECT 1 FROM Project_members WHERE PROJECT_ID = p.ID AND member_id = ?
+          )
+        )`,
       [projectId, userId, userId]
     );
 
@@ -89,7 +92,7 @@ router.get('/', async (req, res) => {
       FROM Projects p
       JOIN Users u ON p.MANAGER_ID = u.ID
       LEFT JOIN Project_members pm ON pm.PROJECT_ID = p.ID
-      WHERE (p.MANAGER_ID = ? OR pm.MEMBER_ID = ?) AND p.is_archive = 0
+      WHERE p.MANAGER_ID = ? OR pm.MEMBER_ID = ?
       GROUP BY p.ID
       `,
       [userId, userId]
