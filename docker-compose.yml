@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.3
+    container_name: taskapp-mysql
+    restart: alway
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "0000"
+      MYSQL_DATABASE: task_management
+      MYSQL_USER: TASKMANAGEMENT
+      MYSQL_PASSWORD: "0000"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
+

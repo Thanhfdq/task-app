@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Sidebar from '../components/sidebar.jsx';
+import Sidebar from '../components/Sidebar.jsx';
 import { Routes, Route } from 'react-router-dom';
 import TasksPage from './TasksPage.jsx';
 import ProjectsPage from './ProjectsPage.jsx';
