@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTaskModal } from '../contexts/TaskModalContext';
 import { UserProvider, useUser } from '../contexts/UserContext';
+import AccountInfoForm from './AccountInfoForm';
+import axios from '../services/api';
 import {
   FaTasks,
   FaProjectDiagram,
@@ -21,7 +23,22 @@ export default function Sidebar({ projects = [] }) {
   const [collapsed, setCollapsed] = useState(false);
   const toggleSidebar = () => setCollapsed(!collapsed);
   const { openModalForNewTask } = useTaskModal();
-  const {user} = useUser();
+  const [showAccountForm, setShowAccountForm] = useState(false);
+  const { user } = useUser();
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef();
+
+  const handleClickOutside = (e) => {
+    if (menuRef.current && !menuRef.current.contains(e.target)) {
+      setMenuOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Filter out archived projects
   const notActiveProjects = projects.filter((p) => !p.is_archive);
@@ -29,11 +46,43 @@ export default function Sidebar({ projects = [] }) {
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header">
-        {!collapsed && <h3 className="app-title">{user.fullname}</h3>}
+        {!collapsed && (
+          <div className="account-menu-wrapper" ref={menuRef}>
+            <button className="account-button" onClick={() => setMenuOpen(!menuOpen)}>
+              {user.fullname} ⏷
+            </button>
+            {menuOpen && (
+              <ul className="account-dropdown">
+                <li onClick={() => setShowAccountForm(true)}>👤 Hồ sơ</li>
+                <li onClick={() => console.log('Go to settings')}>⚙️ Cài đặt</li>
+                <li onClick={() => console.log('Log out')}>🚪 Đăng xuất</li>
+              </ul>
+            )}
+          </div>
+        )}
         <button className="toggle-button" onClick={toggleSidebar}>
           {collapsed ? <TbLayoutSidebarRightCollapse /> : <TbLayoutSidebarRightExpand />}
         </button>
       </div>
+
+      {showAccountForm && (
+        <AccountInfoForm
+          user={user}
+          onSave={(updatedUser) => {
+            // call your update API here or update state
+            axios.put(`/users/${user.id}`, updatedUser)
+              .then(response => {
+                console.log('User updated:', response.data);
+                // Optionally update user context or state here
+              })
+              .catch(error => {
+                console.error('Error updating user:', error);
+              });
+            setShowAccountForm(false); // close after save
+          }}
+          onClose={() => setShowAccountForm(false)}
+        />
+      )}
 
       <nav className="sidebar-nav">
         <button className="btn-primary" onClick={() => openModalForNewTask({

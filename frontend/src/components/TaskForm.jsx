@@ -179,22 +179,27 @@ function TaskForm({ task = {} }) {
                         </section>
                         {/* Comment Section */}
                         {isAllowedToComment && (
-                            <section className="task-section">
-                                <label>Bình luận</label>
-                                <div className="comment-list">
-                                    {comments.map((c, idx) => (
-                                        <div key={idx} className="comment-item">
-                                            <strong>{c.username}:</strong> {c.content}
+                            <div className="comment-section">
+                                <h3>Chat</h3>
+                                <div className="comments-list">
+                                    {comments.map(c => (
+                                        <div className="comment" key={c.id}>
+                                            <span className="comment-meta">{c.username}</span>
+                                            <span className="comment-timestamp">{new Date(c.created_at).toLocaleString()}</span>
+                                            <p>{c.content}</p>
                                         </div>
                                     ))}
                                 </div>
-                                <textarea
-                                    placeholder="Viết bình luận..."
-                                    value={newComment}
-                                    onChange={(e) => setNewComment(e.target.value)}
-                                />
-                                <button type="button" onClick={handleAddComment}>💬 Gửi bình luận</button>
-                            </section>
+
+                                <div className="comment-form">
+                                    <textarea
+                                        value={newComment}
+                                        onChange={e => setNewComment(e.target.value)}
+                                        placeholder="Viết bình luận..."
+                                    />
+                                    <button type='button' onClick={handleAddComment}>Thêm bình luận</button>
+                                </div>
+                            </div>
                         )}
                     </div>
                 </div>

@@ -21,4 +21,30 @@ router.get('/search-users', async (req, res) => {
   }
 });
 
+//PUT /users/:id
+router.put('/:id', async (req, res) => {
+  const { id } = req.params;
+  const { username, fullname, description } = req.body;
+
+  if (!username || !fullname || !description) {
+    return res.status(400).json({ message: 'Missing fields' });
+  }
+
+  try {
+    const [result] = await db.query(
+      `UPDATE Users SET username = ?, user_fullname = ?, user_description = ? WHERE ID = ?`,
+      [username, fullname, description, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ message: 'User updated successfully' });
+  } catch (err) {
+    console.error('Update error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 export default router;
