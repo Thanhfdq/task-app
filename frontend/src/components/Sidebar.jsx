@@ -1,21 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTaskModal } from '../contexts/TaskModalContext';
-import { UserProvider, useUser } from '../contexts/UserContext';
+import { useUser } from '../contexts/UserContext';
 import AccountInfoForm from './AccountInfoForm';
+import ChangePassword from './ChangePassword.jsx';
 import axios from '../services/api';
 import {
   FaTasks,
   FaProjectDiagram,
-  FaChevronLeft,
-  FaChevronRight,
   FaUserCircle,
+  FaUser,
   FaPlus,
-  FaSearch,
+  FaSignOutAlt
 } from 'react-icons/fa';
 import {
   TbLayoutSidebarRightCollapse,
   TbLayoutSidebarRightExpand,
+  TbLockPassword
 } from 'react-icons/tb'
 import '../styles/Sidebar.css';
 
@@ -24,10 +25,12 @@ export default function Sidebar({ projects = [] }) {
   const toggleSidebar = () => setCollapsed(!collapsed);
   const { openModalForNewTask } = useTaskModal();
   const [showAccountForm, setShowAccountForm] = useState(false);
-  const { user } = useUser();
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const { user, logout } = useUser();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef();
+  const [error, setError] = useState('');
 
   const handleClickOutside = (e) => {
     if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -53,9 +56,9 @@ export default function Sidebar({ projects = [] }) {
             </button>
             {menuOpen && (
               <ul className="account-dropdown">
-                <li onClick={() => setShowAccountForm(true)}>👤 Hồ sơ</li>
-                <li onClick={() => console.log('Go to settings')}>⚙️ Cài đặt</li>
-                <li onClick={() => console.log('Log out')}>🚪 Đăng xuất</li>
+                <li onClick={() => setShowAccountForm(true)}><FaUser /> Hồ sơ</li>
+                <li onClick={() => setShowChangePassword(true)}><TbLockPassword /> Đổi mật khẩu</li>
+                <li onClick={logout}><FaSignOutAlt /> Đăng xuất</li>
               </ul>
             )}
           </div>
@@ -81,6 +84,24 @@ export default function Sidebar({ projects = [] }) {
             setShowAccountForm(false); // close after save
           }}
           onClose={() => setShowAccountForm(false)}
+        />
+      )}
+
+      {showChangePassword && (
+        <ChangePassword
+          onSave={(passwordData) => {
+            axios.post('/users/change-password', { userId: user.id, ...passwordData })
+              .then(response => {
+                window.alert('Mật khẩu đã được thay đổi thành công.');
+                setShowChangePassword(false); // close after save
+              })
+              .catch(error => {
+                setError('Mật khẩu hiện tại không đúng hoặc có lỗi xảy ra.');
+              });
+          }}
+          onClose={() => setShowChangePassword(false)}
+          setError={setError}
+          error={error}
         />
       )}
 
