@@ -80,19 +80,26 @@ router.get('/me/recent', async (req, res) => {
 router.get('/', async (req, res) => {
   const userId = req.session.userId;
   if (!userId) return res.status(401).json({ message: 'Not authenticated' });
-
   try {
     const [rows] = await db.query(
       `
       SELECT 
           p.*,
-          DATE_FORMAT(p.start_date, '%Y-%m-%d') AS start_date,
+          DATE_FORMAT(p.start_date, '%Y-%m-%y') AS start_date,
           DATE_FORMAT(p.end_date, '%Y-%m-%d') AS end_date,
-          u.username AS manager_username
-      FROM Projects p
-      JOIN Users u ON p.MANAGER_ID = u.ID
-      LEFT JOIN Project_members pm ON pm.PROJECT_ID = p.ID
-      WHERE p.MANAGER_ID = ? OR pm.MEMBER_ID = ?
+          u.username AS manager_username,
+          COUNT(DISTINCT t.ID) AS task_count,
+          COUNT(DISTINCT pm.MEMBER_ID) AS member_count
+      FROM
+          Projects p
+              JOIN
+          Users u ON p.MANAGER_ID = u.ID
+              LEFT JOIN
+          Project_members pm ON pm.PROJECT_ID = p.ID
+          LEFT JOIN
+        Tasks t ON t.PROJECT_ID = p.ID
+      WHERE
+          p.MANAGER_ID = ? OR pm.MEMBER_ID = ?
       GROUP BY p.ID
       `,
       [userId, userId]
@@ -302,6 +309,7 @@ router.post('/', async (req, res) => {
   }
 });
 
+// PUT /projects/:id - Update project details
 router.put('/:id', async (req, res) => {
   const userId = req.session.userId;
   if (!userId) return res.status(401).json({ message: 'Not authenticated' });

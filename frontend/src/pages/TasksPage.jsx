@@ -63,12 +63,6 @@ function TasksPage({ user, onlyMine = false }) {
                     >
                         Công việc của tôi
                     </span>
-                    <button onClick={() => openModalForNewTask({
-                        start_date: new Date().toISOString().substring(0, 10),
-                        end_date: new Date().toISOString().substring(0, 10)
-                    })}>
-                        + Tạo công việc mới
-                    </button>
                 </div>
 
                 <div className="task-toolbar-filters">

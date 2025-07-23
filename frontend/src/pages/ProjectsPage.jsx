@@ -6,7 +6,7 @@ import Drawer from '../components/Drawer';
 import ProjectForm from '../components/ProjectForm.jsx';
 import { FaPen, FaPlus } from 'react-icons/fa';
 
-function ProjectsPage() {
+function ProjectsPage({user}) {
     const [showDrawer, setShowDrawer] = useState(false);
     const [showArchived, setShowArchived] = useState(false);
     const [editingProject, setEditingProject] = useState(null);
@@ -34,8 +34,7 @@ function ProjectsPage() {
         axios.get('/projects').then(res => {
             setProjects(res.data);
         });
-        console.log("Projects reloaded:", projects);
-    }
+    };
 
     useEffect(() => {
         reloadProjectList();
@@ -108,15 +107,15 @@ function ProjectsPage() {
             <ul className="project-list">
                 {paginated.map(p => (
                     <li key={p.ID} className={`project-card ${p.is_archive ? 'archived' : ''}`}>
-                        <div className="project-card-header">
+                    <div className="project-card-header">
                             <h3>{p.project_name}</h3>
-                            <button onClick={() => openEditDrawer(p)} className="edit-btn"><FaPen style={{ fontSize: '1rem' }} /></button>
+                        {user.id === p.MANAGER_ID && <button className="edit-btn" onClick={() => openEditDrawer(p)}><FaPen style={{ fontSize: '1rem' }} /></button>}
                         </div>
+                        <p><strong>{p.task_count} Công việc</strong></p>
+                        <p><strong>{p.member_count} Thành viên</strong></p>
                         <p><strong>Người quản lý:</strong> {p.manager_username}</p>
-                        <p><strong>Ngày bắt đầu:</strong> {p.start_date}</p>
-                        <p><strong>Ngày kết thúc:</strong> {p.end_date}</p>
-                        <p><strong>Label:</strong> {p.label || 'Không có'}</p>
-                        <p><strong>Trạng thái:</strong> {p.project_state ? 'Đã đóng' : 'Đang mở'}{p.is_archive && '(Lưu trữ)'}</p>
+                        <p>{p.project_state ? 'Đã đóng' : 'Đang mở'} {p.is_archive ? '(Lưu trữ)' : ''}</p>
+                        {p.label && <span className='label-pill'>{p.label}</span>}
                         <Link to={`/projects/${p.ID}`} className="overlay-link" />
                     </li>
                 ))}

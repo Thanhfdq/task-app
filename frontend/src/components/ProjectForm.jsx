@@ -14,7 +14,7 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
     const [formData, setFormData] = useState({
         project_name: '',
         project_description: '',
-        start_date: '',
+        start_date: new Date().toISOString().split('T')[0], // format YYYY-MM-DD
         end_date: '',
         complete_date: '',
         label: '',

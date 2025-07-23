@@ -13,7 +13,7 @@
   width: 280px;
   height: 100%;
   padding: 0 12px;
-  border-right: 1px solid #a6a6a6;
+  border-left: 1px solid #a6a6a6;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -79,6 +79,7 @@
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s ease;
+  margin-top: 12px;
 }
 
 .add-card:hover,

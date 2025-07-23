@@ -21,7 +21,7 @@ export default function MainPage({ user }) {
         <main className="content">
           <Routes>
             <Route path="/tasks" element={<TasksPage user={user} />} />
-            <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/projects" element={<ProjectsPage user={user} />} />
             <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
             <Route path="/tasks/my-tasks" element={<TasksPage onlyMine={true} user={user} />} />
           </Routes>

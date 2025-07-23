@@ -84,7 +84,7 @@ export default function ProjectDetailPage() {
           project={editingProject}
           onSuccess={() => {
             closeDrawer();
-            reloadProjectList();
+            refetchProject();
           }}
           onCancel={closeDrawer}
         />

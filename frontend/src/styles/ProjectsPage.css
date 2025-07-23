@@ -119,18 +119,10 @@
 }
 
 .edit-btn {
-  font-size: 13px;
-  padding: 4px 8px;
-  background-color: #4b82f1;
-  color: white;
-  border-radius: 6px;
-  text-decoration: none;
-  transition: background-color 0.2s;
+  background-color: transparent;
+  color: blue;
+  border: none;
   z-index: 100 ;
-}
-
-.edit-btn:hover {
-  background-color: #3a6bd9;
 }
 
 .overlay-link {

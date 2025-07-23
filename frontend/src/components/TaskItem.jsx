@@ -48,13 +48,14 @@ function TaskItem({ task }) {
                 </strong>
             </div>
 
-            <div className="task-labels">
-                {task.label?.split(",").map((label) => (
-                    <span key={label} className="label-pill">
-                        {label}
-                    </span>
-                ))}
-            </div>
+            {task.label &&
+                <div className="task-labels">
+                    {task.label?.split(",").map((label) => (
+                        <span key={label} className="label-pill">
+                            {label}
+                        </span>
+                    ))}
+                </div>}
 
 
             <div className="task-meta">
