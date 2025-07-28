@@ -272,7 +272,7 @@ export default function KanbanView({ project }) {
                                     }}
                                     draggable
                                     onDragStart={(e) => handleDragStart(e, task)}
-                                    onClick={() => openModalForEditTask(task)}
+                                    onClick={() => openModalForEditTask({ ...task, project_name: project.project_name })}
                                 >
                                     <label>
                                         <input
