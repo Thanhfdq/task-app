@@ -4,7 +4,7 @@ import axios from '../services/api';
 import { useUser } from '../contexts/UserContext';
 import '../styles/ProjectMembersPanel.css';
 
-export default function ProjectMembersPanel({ isOpen, onClose, projectId }) {
+export default function ProjectMembersPanel({ isOpen, onClose, project }) {
     const [members, setMembers] = useState([]);
     const [search, setSearch] = useState('');
     const [results, setResults] = useState([]);
@@ -16,7 +16,7 @@ export default function ProjectMembersPanel({ isOpen, onClose, projectId }) {
 
     const fetchMembers = async () => {
         try {
-            const res = await axios.get(`/projects/${projectId}/members-with-task-count`);
+            const res = await axios.get(`/projects/${project.ID}/members-with-task-count`);
             setMembers(res.data);
         } catch (err) {
             console.error("Lỗi khi lấy thành viên:", err);
@@ -35,7 +35,7 @@ export default function ProjectMembersPanel({ isOpen, onClose, projectId }) {
 
     const addMember = async (userIdToAdd) => {
         try {
-            await axios.post(`/projects/${projectId}/members`, { userIdToAdd });
+            await axios.post(`/projects/${project.ID}/members`, { userIdToAdd });
             setSearch('');
             setResults([]);
             fetchMembers();
@@ -47,7 +47,7 @@ export default function ProjectMembersPanel({ isOpen, onClose, projectId }) {
     const removeMember = async (userId) => {
         if (!window.confirm("Xóa người dùng này khỏi danh sách?")) return;
         try {
-            await axios.delete(`/projects/${projectId}/members/${userId}`);
+            await axios.delete(`/projects/${project.ID}/members/${userId}`);
             fetchMembers();
         } catch (err) {
             alert(err.response?.data?.message || "Không thể xóa người dùng.");
@@ -60,13 +60,18 @@ export default function ProjectMembersPanel({ isOpen, onClose, projectId }) {
             <ul className="member-list">
                 {members.map(m => (
                     <li key={m.ID} style={{ marginBottom: '8px' }}>
-                        <strong>{m.username}</strong> ({m.user_fullname}) – <em>{m.task_count} công việc</em>
-                        {m.ID !== user.ID && m.task_count === 0 && (
+                        <div>
+                            {m.ID === project.manager_id && <div className='manager-label'>Quản lý</div>}
+                            <div>{m.username}</div>
+                            <strong>{m.user_fullname}</strong>
+                            {m.ID === user.id && <span style={{ color: '#888' }}> (Bạn)</span>}
+                        </div>
+                        <em>{m.task_count} công việc</em>
+                        {m.ID !== user.id && m.task_count === 0 && (
                             <button className='remove-btn' onClick={() => removeMember(m.ID)} style={{ marginLeft: '12px', color: 'red' }}>
                                 Xóa
                             </button>
                         )}
-                        {m.ID === user.ID && <span style={{ color: '#888' }}> (Bạn)</span>}
                     </li>
                 ))}
             </ul>

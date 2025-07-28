@@ -12,8 +12,10 @@ router.get('/search-users', async (req, res) => {
   try {
     const [users] = await db.query(
       `SELECT ID, username, user_fullname FROM Users 
-       WHERE LOWER(username) LIKE CONCAT('%', LOWER(?), '%') LIMIT 10`,
-      [keyword]
+       WHERE LOWER(username) LIKE CONCAT('%', LOWER(?), '%')
+       OR LOWER(user_fullname) LIKE CONCAT('%', LOWER(?), '%')
+       LIMIT 10`,
+      [keyword, keyword]
     );
     res.json(users);
   } catch (err) {

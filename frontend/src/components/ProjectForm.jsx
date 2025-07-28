@@ -126,7 +126,7 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
             <ProjectMembersPanel
                 isOpen={showMemberDrawer}
                 onClose={() => setShowMemberDrawer(false)}
-                projectId={project ? project.ID : null}
+                project={project ? project : null}
             />
         </div>
     );
