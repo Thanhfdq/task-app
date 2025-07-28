@@ -22,7 +22,7 @@ export default function AuthPage({ onAuthSuccess }) {
                 withCredentials: true
             });
             if (res.data && res.data.success) {
-                localStorage.setItem('user', JSON.stringify(res.data.user));
+                sessionStorage.setItem('user', JSON.stringify(res.data.user));
                 onAuthSuccess(res.data.user);
                 navigate('/projects');
             } else {
