@@ -67,6 +67,11 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
                 await axios.post(`/projects/${newProject.ID}/members`, {
                     userIdToAdd: user.id
                 });
+
+                // Create default task group for the new project
+                await axios.post(`/projects/${newProject.ID}/groups`, {
+                    name: 'Cột 1'
+                });
             }
             onSuccess();
         } catch (err) {
