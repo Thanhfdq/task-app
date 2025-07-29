@@ -58,8 +58,8 @@ export default function ProjectDetailPage() {
       <div className="project-header">
         <h3>{project.project_name}</h3>
         <section className="project-info">
-          <button onClick={() => openEditDrawer(project)} className="edit-btn">Thông tin</button>
-          <button onClick={() => setShowArchivedTasksPanel(true)} className="archive-btn">Danh sách lưu trữ</button>
+          <button onClick={() => openEditDrawer(project)} className="btn-secondary">Thông tin</button>
+          <button onClick={() => setShowArchivedTasksPanel(true)} className="btn-secondary">Danh sách lưu trữ</button>
         </section>
       </div>
 

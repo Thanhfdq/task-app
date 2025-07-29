@@ -49,20 +49,7 @@ export default function Sidebar({ projects = [] }) {
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header">
-        {!collapsed && (
-          <div className="account-menu-wrapper" ref={menuRef}>
-            <button className="account-button" onClick={() => setMenuOpen(!menuOpen)}>
-              {user.fullname} ⏷
-            </button>
-            {menuOpen && (
-              <ul className="account-dropdown">
-                <li onClick={() => setShowAccountForm(true)}><FaUser /> Hồ sơ</li>
-                <li onClick={() => setShowChangePassword(true)}><TbLockPassword /> Đổi mật khẩu</li>
-                <li onClick={logout}><FaSignOutAlt /> Đăng xuất</li>
-              </ul>
-            )}
-          </div>
-        )}
+
         <button className="toggle-button" onClick={toggleSidebar}>
           {collapsed ? <TbLayoutSidebarRightCollapse /> : <TbLayoutSidebarRightExpand />}
         </button>
@@ -131,9 +118,9 @@ export default function Sidebar({ projects = [] }) {
       </div>
 
       {!collapsed && (
-        <div className="sidebar-recent">
-          <div className="sidebar-recent-title">Các danh sách</div>
-          <ul className="sidebar-recent-list">
+        <div className="sidebar-list">
+          <div className="sidebar-list-title">Các danh sách</div>
+          <ul className="sidebar-list-items">
             {notActiveProjects.map((p) => (
               <li key={p.ID}>
                 <Link to={`/projects/${p.ID}`}>
@@ -144,6 +131,21 @@ export default function Sidebar({ projects = [] }) {
           </ul>
         </div>
       )}
+      <div className="account-menu-wrapper" ref={menuRef}>
+        <button className="btn-secondary" onClick={() => setMenuOpen(!menuOpen)} ref={menuRef}>
+          <FaUser />
+          {!collapsed && (
+            <span>{user.fullname}</span>
+          )}
+          {menuOpen && (
+            <ul className="account-dropdown">
+              <li onClick={() => setShowAccountForm(true)}><FaUser /> Hồ sơ</li>
+              <li onClick={() => setShowChangePassword(true)}><TbLockPassword /> Đổi mật khẩu</li>
+              <li onClick={logout}><FaSignOutAlt /> Đăng xuất</li>
+            </ul>
+          )}
+        </button>
+      </div>
     </aside>
   );
 }

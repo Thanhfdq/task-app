@@ -191,7 +191,7 @@ export default function KanbanView({ project }) {
                     <div key={col.ID} className="kanban-column"
                         onDragOver={handleDragOver}
                         onDrop={(e) => handleDrop(e, col.ID)}>
-                        <div className="kanban-column-header" style={{ position: 'relative' }}>
+                        <div className="kanban-column-header">
                             {/* Editable column name */}
                             {editingGroupId === col.ID ? (
                                 <input
@@ -221,7 +221,7 @@ export default function KanbanView({ project }) {
                                     {col.group_name}
                                 </h4>
                             )}
-                            <span>{tasksByColumn[col.ID]?.length || 0}</span>
+                            <span>({tasksByColumn[col.ID]?.length || 0})</span>
                             <button
                                 className="kanban-more-btn"
                                 onClick={() => setOpenMenuColId(openMenuColId === col.ID ? null : col.ID)}
@@ -229,21 +229,7 @@ export default function KanbanView({ project }) {
                                 aria-label="More"
                             >⋮</button>
                             {openMenuColId === col.ID && (
-                                <div
-                                    className="kanban-more-menu"
-                                    ref={menuRef}
-                                    style={{
-                                        position: 'absolute',
-                                        top: 30,
-                                        right: 0,
-                                        background: '#fff',
-                                        border: '1px solid #ccc',
-                                        borderRadius: 4,
-                                        zIndex: 10,
-                                        minWidth: 120,
-                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                                    }}
-                                >
+                                <div className="kanban-more-menu" ref={menuRef}>
                                     <button
                                         onClick={() => handleRemoveColumn(col.ID)}
                                         disabled={!isEmpty}
@@ -295,22 +281,22 @@ export default function KanbanView({ project }) {
                     </div>
                 );
             })}
-            <div className="kanban-column">
-                {!isAddingColumn ? (
-                    <button className='add-column' onClick={() => setIsAddingColumn(true)}>+ Thêm cột</button>
-                ) : (
-                    <div className="add-column-form">
-                        <input
-                            ref={inputRef}
-                            value={newColumnName}
-                            onChange={e => setNewColumnName(e.target.value)}
-                            onBlur={handleAddColumn}
-                            placeholder="Nhập tên cột..."
-                        />
-                        <button onMouseDown={() => setIsAddingColumn(false)}>✖</button>
-                    </div>
-                )}
-            </div>
+            {/* <div className="kanban-column"> */}
+            {!isAddingColumn ? (
+                <button className='add-column' onClick={() => setIsAddingColumn(true)}>+ Thêm cột</button>
+            ) : (
+                <div className="add-column-form">
+                    <input
+                        ref={inputRef}
+                        value={newColumnName}
+                        onChange={e => setNewColumnName(e.target.value)}
+                        onBlur={handleAddColumn}
+                        placeholder="Nhập tên cột..."
+                    />
+                    <button onMouseDown={() => setIsAddingColumn(false)}>✖</button>
+                </div>
+            )}
+            {/* </div> */}
         </div>
     );
 }

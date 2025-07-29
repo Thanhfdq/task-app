@@ -1,4 +1,11 @@
 /* KanbanView.css */
+html {
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
 
 .kanban-view {
   display: flex;
@@ -13,20 +20,31 @@
   width: 280px;
   height: 100%;
   padding: 0 12px;
-  border-left: 1px solid #a6a6a6;
+  border-right: 1px solid #a6a6a6;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
 }
 
 .kanban-column-header {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: 50px;
-  /* margin-bottom: 12px; */
-  font-weight: bold;
   padding-bottom: 4px;
+}
+
+.kanban-more-menu {
+  position: absolute;
+  top: 30;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4;
+  z-index: 10;
+  min-width: 120;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .kanban-cards {
@@ -70,22 +88,36 @@
   color: #777;
 }
 
-.add-card,
-.add-column {
+.add-card, .add-column {
+  position: sticky;
   background: transparent;
+  backdrop-filter: blur(5px);
   border: 1px dashed #aaa;
   color: #555;
   padding: 6px;
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s ease;
-  margin-top: 12px;
+}
+
+.add-card {
+  bottom: 0;
+  margin: 12px 0;
+}
+
+.add-column {
+  position: sticky;
+  top: 0;
+  right: 0;
+  width: 280px;
+  height: calc(100% - 24px);
+  margin: 12px;
 }
 
 .add-card:hover,
 .add-column:hover {
-  background: #eee;
-  color: #000;
+  background: blue;
+  color: white;
 }
 
 .kanban-column.drag-over {
