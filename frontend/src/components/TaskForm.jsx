@@ -195,9 +195,9 @@ function TaskForm({ task = {} }) {
                                     <textarea
                                         value={newComment}
                                         onChange={e => setNewComment(e.target.value)}
-                                        placeholder="Viết bình luận..."
+                                        placeholder="Viết lời nhắn..."
                                     />
-                                    <button type='button' onClick={handleAddComment}>Thêm bình luận</button>
+                                    <button type='button' onClick={handleAddComment}>Thêm lời nhắn</button>
                                 </div>
                             </div>
                         )}

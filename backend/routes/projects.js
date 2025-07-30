@@ -112,6 +112,44 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /projects/:userId/owned - Get all projects owned by a user
+router.get('/:userId/owned', async (req, res) => {
+  const { userId } = req.params;
+  const isArchived = req.query;
+
+  let sql = `
+      SELECT 
+          p.ID AS PROJECT_ID, 
+          p.project_name, 
+          p.project_description,
+          p.label,
+          p.is_archive,
+          p.project_state,
+          p.MANAGER_ID,
+          u.username AS manager_username,
+          DATE_FORMAT(p.start_date, '%Y-%m-%d') AS start_date,
+          DATE_FORMAT(p.end_date, '%Y-%m-%d') AS end_date,
+          DATE_FORMAT(p.complete_date, '%Y-%m-%d') AS complete_date
+      FROM Projects p
+      JOIN Users u ON p.MANAGER_ID = u.ID
+      WHERE p.MANAGER_ID = ?
+      `;
+  const params = [userId];
+  if (isArchived) {
+    sql += ` AND p.is_archive = ?`;
+    params.push(isArchived);
+  }
+
+  try {
+    const [rows] = await db.query(sql, params);
+
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error', error: err });
+  }
+});
+
 // GET /projects/:projectId/tasks - Lấy danh sách task thuộc danh sách (Không lưu trữ)
 router.get('/:projectId/tasks', async (req, res) => {
   if (!checkAuth(req)) return res.status(401).json({ message: 'Not authenticated' });
