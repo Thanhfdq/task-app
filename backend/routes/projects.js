@@ -112,11 +112,11 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /projects/:userId/owned - Get all projects owned by a user
-router.get('/:userId/owned', async (req, res) => {
+// GET /projects/owner/:userId - Get all projects owned by a user
+router.get('/owner/:userId', async (req, res) => {
   const { userId } = req.params;
-  const isArchived = req.query;
-
+  const { isArchived } = req.query;
+  if (!checkAuth(req)) return res.status(401).json({ message: 'Not authenticated' });
   let sql = `
       SELECT 
           p.ID AS PROJECT_ID, 
@@ -135,14 +135,14 @@ router.get('/:userId/owned', async (req, res) => {
       WHERE p.MANAGER_ID = ?
       `;
   const params = [userId];
-  if (isArchived) {
+  if (typeof isArchived !== 'undefined') {
+    console.log('isArchived:', isArchived);
     sql += ` AND p.is_archive = ?`;
     params.push(isArchived);
   }
 
   try {
     const [rows] = await db.query(sql, params);
-
     res.json(rows);
   } catch (err) {
     console.error(err);
