@@ -163,6 +163,11 @@
   overflow: auto;
 }
 
+.sidebar-list span {
+  display: flex;
+  justify-content: space-between;
+}
+
 .sidebar-list-title {
   font-weight: 600;
   font-size: 14px;

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTaskModal } from '../contexts/TaskModalContext';
 import { useUser } from '../contexts/UserContext';
@@ -16,11 +16,12 @@ import {
 import {
   TbLayoutSidebarRightCollapse,
   TbLayoutSidebarRightExpand,
-  TbLockPassword
+  TbLockPassword,
+  TbReload
 } from 'react-icons/tb'
 import '../styles/Sidebar.css';
 
-export default function Sidebar({ projects = [] }) {
+export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const toggleSidebar = () => setCollapsed(!collapsed);
   const { openModalForNewTask } = useTaskModal();
@@ -31,6 +32,17 @@ export default function Sidebar({ projects = [] }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef();
   const [error, setError] = useState('');
+  const [projects, setProjects] = useState([]);
+
+
+  const reloadSideBarList = () => {
+    axios.get('/projects').then(res => setProjects(res.data));
+  };
+
+  useEffect(() => {
+    // Fetch projects when the component mounts
+    reloadSideBarList();
+  }, []);
 
   const handleClickOutside = (e) => {
     if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -119,7 +131,12 @@ export default function Sidebar({ projects = [] }) {
 
       {!collapsed && (
         <div className="sidebar-list">
-          <div className="sidebar-list-title">Các danh sách</div>
+          <span>
+            <div className="sidebar-list-title">Các danh sách</div>
+            <button className="btn-secondary" onClick={() => reloadSideBarList()}>
+              <TbReload></TbReload>
+            </button>
+          </span>
           <ul className="sidebar-list-items">
             {notActiveProjects.map((p) => (
               <li key={p.ID}>

@@ -8,15 +8,11 @@ import axios from '../services/api.js';
 import '../styles/MainPage.css';
 
 export default function MainPage({ user }) {
-  const [projects, setProjects] = useState([]);
 
-  useEffect(() => {
-    axios.get('/projects').then(res => setProjects(res.data));
-  }, []);
 
   return (
     <div className="layout">
-      <Sidebar projects={projects} />
+      <Sidebar />
       <div className="main">
         <main className="content">
           <Routes>
