@@ -165,6 +165,32 @@
   justify-content: space-between;
   margin-top: 16px;
 }
+.attached-files-list {
+  margin-top: 8px;
+  padding-left: 16px;
+}
+
+.attached-files-list li {
+  width: 100%;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  font-size: 10px;
+  border-radius: 4px;
+  justify-content: space-between;
+  gap: 8px;
+  background-color: #f3f3f3;
+}
+.attached-files-list li span{
+  display: inline-block;
+  max-width: 100%; /* Adjust to your desired width */
+  white-space: nowrap;
+  overflow: hidden;
+  position: relative;
+  text-overflow: ellipsis;
+}
+
 
 .archive-btn,
 .delete-btn {
@@ -201,6 +227,7 @@
 
 .task-left {
   flex: 7;
+  max-width: 380px;
   display: flex;
   flex-direction: column;
 }

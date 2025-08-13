@@ -67,6 +67,7 @@ CREATE TABLE Tasks (
     FOREIGN KEY fk_tk_tk (PARENT_TASK_ID) REFERENCES Tasks (ID)
 );
 
+-- 6. Create Comments table
 CREATE TABLE Comments (
     ID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     task_id INT UNSIGNED NOT NULL,
@@ -76,6 +77,20 @@ CREATE TABLE Comments (
     FOREIGN KEY (task_id) REFERENCES Tasks(ID),
     FOREIGN KEY (user_id) REFERENCES Users(ID)
 );
+
+-- 7. Create Task_files table
+CREATE TABLE Task_files (
+    ID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    task_id INT UNSIGNED NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(500) NOT NULL,
+    file_size BIGINT,
+    mime_type VARCHAR(100),
+    uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (task_id) REFERENCES Tasks(ID) ON DELETE CASCADE
+);
+
+-- 8. Create Notifications table
 CREATE TABLE Notifications (
     ID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,

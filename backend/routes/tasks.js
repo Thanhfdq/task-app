@@ -1,5 +1,13 @@
 import express from 'express';
 import db from '../middlewares/db.js';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+// Recreate __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.resolve(__filename, '..', '..'); // Go up two levels to reach the root of the project
 
 const router = express.Router();
 
@@ -179,7 +187,7 @@ router.patch('/:id/archive', async (req, res) => {
   if (!userId) return res.status(401).json({ message: 'Not authenticated' });
   const taskId = req.params.id;
   try {
-    await db.query('UPDATE tasks SET is_archive = 1 WHERE ID = ?', [taskId]);
+    await db.query('UPDATE Tasks SET is_archive = 1 WHERE ID = ?', [taskId]);
     res.json({ message: 'Task archived successfully' });
   } catch (err) {
     console.error(err);
@@ -195,7 +203,7 @@ router.patch('/:id/restore', async (req, res) => {
   if (!userId) return res.status(401).json({ message: 'Not authenticated' });
 
   try {
-    await db.query('UPDATE tasks SET is_archive = 0 WHERE ID = ?', [taskId]);
+    await db.query('UPDATE Tasks SET is_archive = 0 WHERE ID = ?', [taskId]);
     res.json({ message: 'Task restored successfully' });
   } catch (err) {
     console.error(err);
@@ -209,7 +217,7 @@ router.delete('/:id', async (req, res) => {
   if (!userId) return res.status(401).json({ message: 'Not authenticated' });
   const taskId = req.params.id;
   try {
-    await db.query('DELETE FROM tasks WHERE ID = ?', [taskId]);
+    await db.query('DELETE FROM Tasks WHERE ID = ?', [taskId]);
     res.json({ message: 'Task deleted successfully' });
   } catch (err) {
     console.error(err);
@@ -224,7 +232,7 @@ router.patch('/:id/move', async (req, res) => {
   const { id } = req.params;
   const { new_GROUP_ID } = req.body;
   try {
-    await db.query('UPDATE tasks SET GROUP_ID = ? WHERE ID = ?', [new_GROUP_ID, id]);
+    await db.query('UPDATE Tasks SET GROUP_ID = ? WHERE ID = ?', [new_GROUP_ID, id]);
     res.sendStatus(200);
   } catch (err) {
     console.error(err);
@@ -234,23 +242,158 @@ router.patch('/:id/move', async (req, res) => {
 
 // GET /tasks/:taskId/comments
 router.get('/:taskId/comments', async (req, res) => {
-    const [comments] = await db.query(`
+  const [comments] = await db.query(`
         SELECT Comments.*, Users.username FROM Comments
         JOIN Users ON Users.ID = Comments.user_id
         WHERE task_id = ?
         ORDER BY created_at ASC
     `, [req.params.taskId]);
-    res.json(comments);
+  res.json(comments);
 });
 
 // POST /tasks/:taskId/comments
 router.post('/:taskId/comments', async (req, res) => {
-    const { content, user_id } = req.body;
-    await db.query(`
+  const { content, user_id } = req.body;
+  await db.query(`
         INSERT INTO Comments (task_id, user_id, content)
         VALUES (?, ?, ?)
     `, [req.params.taskId, user_id, content]);
-    res.sendStatus(201);
+  res.sendStatus(201);
 });
+
+// Multer setup: save files into "uploads/tasks/<taskId>"
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const taskId = req.params.taskId;
+    const dir = `uploads/tasks/${taskId}`;
+
+    fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname); // avoid name conflicts
+  }
+});
+
+const upload = multer({ storage });
+
+// POST /upload-files/:taskId
+router.post('/upload-files/:taskId', upload.array('files'), async (req, res) => {
+  const taskId = req.params.taskId;
+  console.log("Files received for task upload:", req.files);
+  const files = req.files || (req.files ? [req.files] : []);
+  console.log(`Uploading files for task ${taskId}:`, files);
+
+  if (files.length === 0) {
+    return res.status(400).json({ error: "No files uploaded." });
+  }
+
+  try {
+    for (const file of files) {
+      await db.query(`
+        INSERT INTO Task_files (task_id, file_name, file_path, file_size, mime_type)
+        VALUES (?, ?, ?, ?, ?)`,
+        [taskId, file.originalname, file.path, file.size, file.mimetype]
+      );
+    }
+
+    res.status(200).json({ success: true, message: "Files uploaded." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Something went wrong while saving file metadata." });
+  }
+});
+
+// GET /tasks/:taskId/files
+router.get('/:taskId/files', async (req, res) => {
+  const taskId = req.params.taskId;
+
+  try {
+    const [rows] = await db.query(`
+      SELECT * 
+      FROM Task_files
+      WHERE task_id = ?
+      ORDER BY uploaded_at DESC
+    `, [taskId]);
+
+    res.status(200).json({
+      success: true,
+      files: rows
+    });
+  } catch (err) {
+    console.error('Error fetching task files:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Could not fetch task files.'
+    });
+  }
+});
+
+// GET /tasks/files/:fileId/download
+router.get('/files/:fileId/download', async (req, res) => {
+  const fileId = req.params.fileId;
+
+  try {
+    const [rows] = await db.query(
+      'SELECT file_name, file_path, task_id FROM Task_files WHERE ID = ?',
+      [fileId]
+    );
+
+    if (!rows.length) return res.status(404).json({ error: 'File not found' });
+
+    const fileRow = rows[0];
+
+    // file_path in DB should be relative to backend, e.g. "uploads/tasks/1/xxx.jpg"
+    const filePath = path.resolve(__dirname, '..', fileRow.file_path);
+
+    // Security check: enforce that filePath is inside uploads directory
+    const uploadsDir = path.resolve(__dirname, '..', 'uploads');
+
+    // Ensure the file path is within the uploads directory
+    if (!filePath.startsWith(uploadsDir)) {
+      return res.status(400).json({ error: 'Invalid file path' });
+    }
+
+    if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File not found on disk' });
+
+    // This sets headers and streams file; filename will be used by the browser
+    res.download(filePath, fileRow.file_name, (err) => {
+      if (err) {
+        console.error('Download failed:', err);
+        if (!res.headersSent) res.status(500).send('Server error while downloading');
+      }
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// DELETE /tasks/files/:taskId/:fileName
+router.delete('/files/:taskId/:fileName', async (req, res) => {
+  const { taskId, fileName } = req.params;
+  console.log(`Deleting file ${fileName} for task ${taskId}`);
+  try {
+    // 1️⃣ Path to file on server
+    const filePath = path.join(__dirname, 'uploads', 'tasks', taskId, fileName);
+    console.log(`File path: ${filePath}`);
+    // 2️⃣ Delete from server
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    } else {
+      return res.status(404).json({ message: 'File not found on server' });
+    }
+
+    // 3️⃣ Delete from database
+    await db.query('DELETE FROM Task_files WHERE task_id = ? AND file_name = ?', [taskId, fileName]);
+
+    res.json({ message: 'File deleted successfully' });
+  } catch (error) {
+    console.error("Delete file error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 export default router;

@@ -4,7 +4,6 @@ import { Routes, Route } from 'react-router-dom';
 import TasksPage from './TasksPage.jsx';
 import ProjectsPage from './ProjectsPage.jsx';
 import ProjectDetailPage from './ProjectDetailPage.jsx';
-import axios from '../services/api.js';
 import '../styles/MainPage.css';
 
 export default function MainPage({ user }) {

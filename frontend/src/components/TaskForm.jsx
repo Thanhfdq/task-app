@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { useUser } from '../contexts/UserContext';
 import { useTaskModal } from '../contexts/TaskModalContext';
+import { IoIosClose } from 'react-icons/io';
+import { CiFileOn } from "react-icons/ci";
 import axios from '../services/api';
+import URL from '../constants/url';
 import '../styles/TaskForm.css';
 
 function TaskForm({ task = {} }) {
@@ -28,7 +31,63 @@ function TaskForm({ task = {} }) {
   const [projects, setProjects] = useState([]);
   const [performers, setPerformers] = useState([]);
   const [groups, setGroups] = useState([]);
-  console.log("TaskForm initialized with task:", selectedTask);
+  const [attachedFiles, setAttachedFiles] = useState([]);
+
+
+  const getAttachedFiles = async () => {
+    console.log("Fetching attached files for task ID:", formData.ID);
+    if (formData.ID) {
+      try {
+        await axios.get(`/tasks/${formData.ID}/files`).then(res => {
+          setAttachedFiles(res.data.files || []);
+
+          console.log("Attached files:", res.data);
+          console.log("Attached files state updated:", attachedFiles);
+        });
+      } catch (error) {
+        console.error("Error fetching attached files:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    getAttachedFiles();
+  }, [formData.ID]);
+  useEffect(() => {
+    console.log("Attached files state updated:", attachedFiles);
+  }, [attachedFiles]);
+
+
+  const handleFileChange = async (e) => {
+    const formdata = new FormData();
+    const files = e.target.files;
+
+    for (let i = 0; i < files.length; i++) {
+      formdata.append("files", files[i]); // append each file individually
+    }
+    const res = await axios.post(`/tasks/upload-files/${formData.ID}`, formdata, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    if (res.status === 200) {
+      console.log('Files uploaded successfully');
+      getAttachedFiles();
+    } else {
+      console.error('Upload failed');
+    }
+  };
+
+  const handleRemoveFile = (taskId, fileName) => {
+    axios.delete(`/tasks/files/${taskId}/${fileName}`)
+      .then(() => {
+        getAttachedFiles(); // Refresh the list of attached files
+      })
+      .catch(error => {
+        console.error("Error removing file:", error);
+      });
+  };
 
 
   useEffect(() => {
@@ -187,6 +246,28 @@ function TaskForm({ task = {} }) {
                 placeholder="Thêm mô tả chi tiết..."
               />
             </section>
+            <section className="task-section">
+              <label>Đính kèm tệp</label>
+              <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+              />
+              <ul className="attached-files-list">
+                {attachedFiles.map((file) => (
+                  <li key={file.ID}>
+                    <span>
+                      <CiFileOn style={{ marginRight: '5px' }} />
+                        <a href={`${URL.BACK_END_URL}${"/api/tasks/files/"}${file.ID}${"/download"}`} target="_blank" rel="noopener noreferrer">
+                        {file.file_name}
+                      </a>
+                    </span>
+                    <button type="button" onClick={() => handleRemoveFile(file.task_id, file.file_name)}><IoIosClose /></button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
             <section className="task-section">
               <label>Thẻ (Label)</label>
               <input

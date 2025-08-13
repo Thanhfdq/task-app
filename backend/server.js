@@ -28,6 +28,9 @@ app.use(cors({
   credentials: true
 }));
 
+// Make 'uploads' folder publicly accessible
+app.use('/uploads', express.static('uploads'));
+
 // ✅ Router
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectsRoutes);
