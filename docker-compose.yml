@@ -4,7 +4,7 @@ services:
   mysql:
     image: mysql:8.3
     container_name: taskapp-mysql
-    restart: alway
+    restart: always
     ports:
       - "3306:3306"
     environment:

@@ -344,10 +344,10 @@ router.get('/files/:fileId/download', async (req, res) => {
     const fileRow = rows[0];
 
     // file_path in DB should be relative to backend, e.g. "uploads/tasks/1/xxx.jpg"
-    const filePath = path.resolve(__dirname, '..', fileRow.file_path);
-
+    const filePath = path.resolve(__dirname, fileRow.file_path);
+    console.log(`File path to download: ${filePath}`);
     // Security check: enforce that filePath is inside uploads directory
-    const uploadsDir = path.resolve(__dirname, '..', 'uploads');
+    const uploadsDir = path.resolve(__dirname, 'uploads');
 
     // Ensure the file path is within the uploads directory
     if (!filePath.startsWith(uploadsDir)) {
