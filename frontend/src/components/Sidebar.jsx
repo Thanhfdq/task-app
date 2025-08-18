@@ -155,7 +155,7 @@ export default function Sidebar() {
             <span>{user.fullname}</span>
           )}
           {menuOpen && (
-            <ul className="account-dropdown">
+            <ul className="dropdown">
               <li onClick={() => setShowAccountForm(true)}><FaUser /> Hồ sơ</li>
               <li onClick={() => setShowChangePassword(true)}><TbLockPassword /> Đổi mật khẩu</li>
               <li onClick={logout}><FaSignOutAlt /> Đăng xuất</li>

@@ -1,99 +1,202 @@
 .task-form {
   display: flex;
+  background-color: white;
   flex-direction: column;
   max-width: 700px;
-  margin: 30px auto;
-  background: #fff;
   border-radius: 12px;
-  padding: 24px;
 }
 
-.task-form-header {
-  border-bottom: 1px solid #ddd;
-  margin-bottom: 20px;
+.scroll-pane {
+  max-height: 90vh;
+  overflow-y: auto;
+  margin-top: 20px;
+  padding: 0 30px;
+}
+
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+}
+
+/* row 1 */
+.task-header-left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
 }
 
 .task-title-input {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 30px !important;
+  font-weight: bold;
+  height: 40px;
   width: 100%;
-  border: none;
-  background: transparent;
-  padding: 8px 0;
+  border: none !important;
   outline: none;
-  border-bottom: 1px solid #ccc;
+  margin: 0 !important;
+  white-space: nowrap;       /* don’t wrap text */
+  overflow: hidden;          /* hide overflow */
+  text-overflow: ellipsis;
 }
 
-.task-title-input:focus {
-  border-bottom: 2px solid #4b82f1;
+.task-state{
+  height: 25px !important;
+  width: 25px !important;
 }
 
-.task-meta-top {
-  margin-top: 8px;
+.menu-icon {
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.task-menu-wrapper {
+  position: relative;
+}
+
+.task-menu-wrapper .dropdown {
+  top: 30px;
+  left: auto;
+  right: 0;
+}
+
+/* row 2 */
+
+.task-project {
   font-size: 14px;
   color: #777;
 }
 
-.task-form-body {
+select {
+  appearance: none !important;        /* modern browsers */
+  -webkit-appearance: none; /* Safari/Chrome */
+  -moz-appearance: none;    /* Firefox */
+  border: none !important;
+  background: none !important;
+  width: fit-content !important; /* Adjusts to content width */
+  padding: 0 !important;
+}
+
+.progress-text, .description-title span, .chat-title span {
+  color: gray;
+}
+
+.task-dates, .progress-group, .project, .description-title, .chat-title, .additional-info{
   display: flex;
-  flex-direction: column;
-  gap: 16px;
+  align-items: center;
+  gap: 5px;
 }
 
-.task-section {
-  display: flex;
-  flex-direction: column;
-}
+/* row 3 */
 
-.task-section label {
-  font-weight: 500;
-  margin-bottom: 4px;
-  color: #333;
-}
 
-.task-section input,
-.task-section select,
-.task-section textarea {
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  background: #f9f9f9;
+.task-dates label {
   font-size: 14px;
+  color: #444;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.task-section textarea {
+.task-dates input {
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+
+.progress-container {
+  position: relative;
+  height: 10px;
+  width: 100px;
+  background: #eee;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.progress-bar-modify {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 10px;
+  background: #4caf50;
+  border-radius: 5px;
+}
+
+.progress-thumb {
+  position: absolute;
+  top: -4px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border: 2px solid #4caf50;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  cursor: grab;
+}
+
+
+/* row 4 */
+
+.task-description textarea {
+  width: 100%;
+  min-height: 60px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px;
   resize: vertical;
-  min-height: 80px;
+  margin: 8px 0 20px 0;
 }
 
-.task-section input:focus,
-.task-section select:focus,
-.task-section textarea:focus {
-  border-color: #4b82f1;
-  background: #fff;
+textarea::placeholder {
+  font-style: italic;
+}
+
+
+.comment-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.send-message {
+  position: absolute;
+  right: 0;
+  width: 40px;
+  background: none;
+  border: none;
   outline: none;
 }
 
-/* Comments */
-.comment-section {
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid #eee;
-}
-
+/* row 5: Comments */
 .comments-list {
+  margin-top: 8px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 16px;
+  align-items: flex-start;
 }
 
 .comment {
   position: relative;
   background: #f3f3f3;
+  display: inline-block;
   border-radius: 8px;
   padding: 6px;
+  margin-bottom: 10px;
   font-size: 14px;
+}
+
+.comment p{
+  white-space: normal;   /* allow wrapping */
+  word-wrap: break-word; /* old syntax */
+  overflow-wrap: anywhere;
 }
 
 .comment-meta {
@@ -103,29 +206,10 @@
   display: block;
 }
 
-.comment-form textarea {
-  width: 100%;
-  min-height: 60px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  resize: vertical;
-}
-
-.comment-form button {
-  margin-top: 8px;
-  padding: 8px 16px;
-  background: #4b82f1;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
 .comment-timestamp {
   position: absolute;
-  bottom: 0px;
-  right: 0;
+  top: -20px;
+  left: 0;
   font-size: 12px;
   color: #888;
   background-color: #fff;
@@ -143,109 +227,115 @@
   opacity: 1;
 }
 
-.task-form button[type="submit"] {
-  margin-top: 16px;
-  padding: 12px;
-  font-weight: bold;
-  background: #4b82f1;
-  color: white;
+
+.comment-bar textarea {
+  width: calc(100% - 40px);
+  min-height: 40px;
+  padding: 6px 8px;
   border: none;
-  border-radius: 8px;
-  font-size: 15px;
+  outline: none;
+  resize: vertical;
+}
+
+.button-icon {
+  font-size: 20px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  color: gray;
 }
 
-.task-form button[type="submit"]:hover {
-  background: #3a6edc;
+.icon {
+  font-size: 18px;
+  color: gray;
 }
 
-.task-form-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 16px;
-}
-.attached-files-list {
-  margin-top: 8px;
-  padding-left: 16px;
-}
 
-.attached-files-list li {
-  width: 100%;
-  margin-bottom: 4px;
+
+
+/* row 6 */
+
+
+.tag-attachment-row {
   display: flex;
   align-items: center;
-  padding: 4px;
-  font-size: 10px;
-  border-radius: 4px;
   justify-content: space-between;
-  gap: 8px;
-  background-color: #f3f3f3;
-}
-.attached-files-list li span{
-  display: inline-block;
-  max-width: 100%; /* Adjust to your desired width */
-  white-space: nowrap;
-  overflow: hidden;
-  position: relative;
-  text-overflow: ellipsis;
-}
-
-
-.archive-btn,
-.delete-btn {
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 14px;
-}
-
-.archive-btn {
-  background-color: #ffd166;
-  color: #000;
-}
-
-.archive-btn:hover {
-  background-color: #ffca3a;
-}
-
-.delete-btn {
-  background-color: #ef476f;
-  color: white;
-}
-
-.delete-btn:hover {
-  background-color: #d6405f;
-}
-
-.task-form-grid {
-  display: flex;
-  gap: 24px;
-}
-
-.task-left {
-  flex: 7;
-  max-width: 380px;
-  display: flex;
-  flex-direction: column;
-}
-
-.task-right {
-  flex: 3;
-  display: flex;
-  flex-direction: column;
-}
-
-.task-title-wrapper {
-  display: flex;
-  align-items: center;
-}
-
-.task-form-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 16px;
   gap: 12px;
+  padding: 8px 0;
+}
+
+.tag-pill, .attachment-pill {
+  display: flex;
+  align-items: center;
+  background: #f5f5f5;
+  border-radius: 999px;
+  padding: 6px 10px;
+  gap: 6px;
+}
+
+.additional-info input {
+  width: 150px;
+}
+
+.tag-text {
+  font-style: italic;
+  color: black;
+}
+
+.tag-placeholder {
+  font-size: 12px;
+  color: gray;
+}
+
+.file-count {
+  font-weight: bold;
+}
+
+.save-btn {
+  background: #00a000; /* Green active */
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 6px 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.save-btn:disabled {
+  background: #d3d3d3; /* Gray inactive */
+  cursor: not-allowed;
+}
+
+
+
+
+.attached-files-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.file-item {
+  position: relative;
+  display: inline-block;
+}
+
+.remove-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: red;
+  color: white;
+  border: none;
+  border-radius: 50%; 
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  display: none;
+  cursor: pointer;
+}
+
+.file-item:hover .remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
