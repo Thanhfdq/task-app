@@ -1,5 +1,6 @@
 .account-info-form {
-  max-width: 500px;
+  position: relative;
+  max-width: 1000px;
   margin: auto;
   background: #fff;
   padding: 24px;

@@ -166,13 +166,13 @@
 
 .sidebar-list span {
   display: flex;
+  align-items: center;
   justify-content: space-between;
 }
 
 .sidebar-list-title {
-  font-weight: 600;
   font-size: 14px;
-  color: #333;
+  color: gray;
   margin-bottom: 8px;
 }
 

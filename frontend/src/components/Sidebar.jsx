@@ -1,25 +1,22 @@
-import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useTaskModal } from '../contexts/TaskModalContext';
-import { useUser } from '../contexts/UserContext';
-import AccountInfoForm from './AccountInfoForm';
-import ChangePassword from './ChangePassword.jsx';
-import axios from '../services/api';
+import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useTaskModal } from "../contexts/TaskModalContext";
+import { useUser } from "../contexts/UserContext";
+import AccountInfoForm from "./AccountInfoForm";
+import ChangePassword from "./ChangePassword.jsx";
+import axios from "../services/api";
 import {
-  FaTasks,
-  FaProjectDiagram,
-  FaUserCircle,
-  FaUser,
-  FaPlus,
-  FaSignOutAlt
-} from 'react-icons/fa';
-import {
-  TbLayoutSidebarRightCollapse,
-  TbLayoutSidebarRightExpand,
-  TbLockPassword,
-  TbReload
-} from 'react-icons/tb'
-import '../styles/Sidebar.css';
+  FiCheckSquare,
+  FiBook,
+  FiUser,
+  FiUserCheck,
+  FiPlus,
+  FiLogOut,
+  FiSidebar,
+  FiLock,
+  FiRefreshCcw
+} from "react-icons/fi";
+import "../styles/Sidebar.css";
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
@@ -31,12 +28,11 @@ export default function Sidebar() {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef();
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [projects, setProjects] = useState([]);
 
-
   const reloadSideBarList = () => {
-    axios.get('/projects').then(res => setProjects(res.data));
+    axios.get("/projects").then((res) => setProjects(res.data));
   };
 
   useEffect(() => {
@@ -51,19 +47,18 @@ export default function Sidebar() {
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Filter out archived projects
   const notActiveProjects = projects.filter((p) => !p.is_archive);
 
   return (
-    <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
+    <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
       <div className="sidebar-header">
-
         <button className="toggle-button" onClick={toggleSidebar}>
-          {collapsed ? <TbLayoutSidebarRightCollapse /> : <TbLayoutSidebarRightExpand />}
+          <FiSidebar />
         </button>
       </div>
 
@@ -72,13 +67,14 @@ export default function Sidebar() {
           user={user}
           onSave={(updatedUser) => {
             // call your update API here or update state
-            axios.put(`/users/${user.id}`, updatedUser)
-              .then(response => {
-                console.log('User updated:', response.data);
+            axios
+              .put(`/users/${user.id}`, updatedUser)
+              .then((response) => {
+                console.log("User updated:", response.data);
                 // Optionally update user context or state here
               })
-              .catch(error => {
-                console.error('Error updating user:', error);
+              .catch((error) => {
+                console.error("Error updating user:", error);
               });
             setShowAccountForm(false); // close after save
           }}
@@ -89,13 +85,17 @@ export default function Sidebar() {
       {showChangePassword && (
         <ChangePassword
           onSave={(passwordData) => {
-            axios.post('/users/change-password', { userId: user.id, ...passwordData })
-              .then(response => {
-                window.alert('Mật khẩu đã được thay đổi thành công.');
+            axios
+              .post("/users/change-password", {
+                userId: user.id,
+                ...passwordData,
+              })
+              .then((response) => {
+                window.alert("Mật khẩu đã được thay đổi thành công.");
                 setShowChangePassword(false); // close after save
               })
-              .catch(error => {
-                setError('Mật khẩu hiện tại không đúng hoặc có lỗi xảy ra.');
+              .catch((error) => {
+                setError("Mật khẩu hiện tại không đúng hoặc có lỗi xảy ra.");
               });
           }}
           onClose={() => setShowChangePassword(false)}
@@ -105,26 +105,31 @@ export default function Sidebar() {
       )}
 
       <nav className="sidebar-nav">
-        <button className="btn-primary" onClick={() => openModalForNewTask({
-          start_date: new Date().toISOString().substring(0, 10),
-          end_date: new Date().toISOString().substring(0, 10)
-        })}>
-          <FaPlus />
+        <button
+          className="btn-primary"
+          onClick={() =>
+            openModalForNewTask({
+              start_date: new Date().toISOString().substring(0, 10),
+              end_date: new Date().toISOString().substring(0, 10),
+            })
+          }
+        >
+          <FiPlus />
           {!collapsed && <span>Tạo công việc mới</span>}
         </button>
         <Link to="/projects" className="nav-item">
-          <FaProjectDiagram />
+          <FiBook />
           {!collapsed && <span>Tất cả danh sách</span>}
         </Link>
         <Link to="/tasks" className="nav-item">
-          <FaTasks />
+          <FiCheckSquare />
           {!collapsed && <span>Tất cả công việc</span>}
         </Link>
       </nav>
 
       <div className="sidebar-actions">
         <Link to="/tasks/my-tasks" className="btn-secondary nav-item">
-          <FaUserCircle />
+          <FiUserCheck />
           {!collapsed && <span>Công việc của tôi</span>}
         </Link>
       </div>
@@ -133,8 +138,11 @@ export default function Sidebar() {
         <div className="sidebar-list">
           <span>
             <div className="sidebar-list-title">Các danh sách</div>
-            <button className="btn-secondary" onClick={() => reloadSideBarList()}>
-              <TbReload></TbReload>
+            <button
+              className="btn-secondary"
+              onClick={() => reloadSideBarList()}
+            >
+              <FiRefreshCcw />
             </button>
           </span>
           <ul className="sidebar-list-items">
@@ -149,16 +157,24 @@ export default function Sidebar() {
         </div>
       )}
       <div className="account-menu-wrapper" ref={menuRef}>
-        <button className="btn-secondary" onClick={() => setMenuOpen(!menuOpen)} ref={menuRef}>
-          <FaUser />
-          {!collapsed && (
-            <span>{user.fullname}</span>
-          )}
+        <button
+          className="btn-secondary"
+          onClick={() => setMenuOpen(!menuOpen)}
+          ref={menuRef}
+        >
+          <FiUser />
+          {!collapsed && <span>{user.fullname}</span>}
           {menuOpen && (
             <ul className="dropdown">
-              <li onClick={() => setShowAccountForm(true)}><FaUser /> Hồ sơ</li>
-              <li onClick={() => setShowChangePassword(true)}><TbLockPassword /> Đổi mật khẩu</li>
-              <li onClick={logout}><FaSignOutAlt /> Đăng xuất</li>
+              <li onClick={() => setShowAccountForm(true)}>
+                <FiUser /> Hồ sơ
+              </li>
+              <li onClick={() => setShowChangePassword(true)}>
+                <FiLock /> Đổi mật khẩu
+              </li>
+              <li onClick={logout}>
+                <FiLogOut /> Đăng xuất
+              </li>
             </ul>
           )}
         </button>
