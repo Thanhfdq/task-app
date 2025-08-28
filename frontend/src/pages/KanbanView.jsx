@@ -3,6 +3,7 @@ import axios from '../services/api';
 import '../styles/KanbanView.css';
 import { useTaskModal } from '../contexts/TaskModalContext';
 import { useClickAway } from 'react-use';
+import { FiTrash, FiUser, FiClock} from 'react-icons/fi';
 
 export default function KanbanView({ project }) {
   const [columns, setColumns] = useState([]);
@@ -245,7 +246,7 @@ export default function KanbanView({ project }) {
                       textAlign: 'left'
                     }}
                   >
-                    Remove
+                    <FiTrash/> Xóa cột này
                   </button>
                 </div>
               )}
@@ -273,8 +274,8 @@ export default function KanbanView({ project }) {
                   <h5 onClick={() => handleEditTask(task)} style={{ cursor: 'pointer' }}>{task.task_name}</h5>
                   <p>{task.task_description}</p>
                   <div className="task-meta">
-                    <span>⏱ {task.end_date || 'Unknown'}</span>
-                    <span>👤 {task.performer_username || 'Unassigned'}</span>
+                    <span> <FiClock/> {task.end_date || 'Unknown'}</span>
+                    <span> <FiUser/> {task.performer_username || 'Unassigned'}</span>
                   </div>
                 </div>
               ))}

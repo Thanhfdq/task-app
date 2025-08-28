@@ -2,8 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import { format } from "date-fns";
 import { useUser } from "../contexts/UserContext";
 import { useTaskModal } from "../contexts/TaskModalContext";
-import { IoIosClose } from "react-icons/io";
-import { CiFileOn } from "react-icons/ci";
 import axios from "../services/api";
 import URL from "../constants/url";
 import "../styles/TaskForm.css";
@@ -12,7 +10,6 @@ import {
   FiUser,
   FiPaperclip,
   FiSend,
-  FiTag,
   FiPlus,
   FiArchive,
   FiTrash,
@@ -24,6 +21,23 @@ import {
   FiAlignLeft,
   FiMessageSquare,
 } from "react-icons/fi";
+
+import {
+  BiDotsVerticalRounded,
+  BiUser,
+  BiPaperclip,
+  BiPaperPlane,
+  BiPlus,
+  BiArchiveIn,
+  BiTrashAlt,
+  BiBook,
+  BiFile,
+  BiColumns,
+  BiTime,
+  BiRightArrowAlt,
+  BiDetail,
+  BiMessage
+} from "react-icons/bi";
 
 function TaskForm({ task = {} }) {
   const { user } = useUser();
@@ -277,7 +291,6 @@ function TaskForm({ task = {} }) {
                   task_state: !prev.task_state,
                 }))
               }
-              style={{ marginRight: "10px" }}
             />
             <input
               type="text"
@@ -290,17 +303,17 @@ function TaskForm({ task = {} }) {
           </div>
           <div className="task-header-right">
             <div className="task-menu-wrapper">
-              <FiMoreVertical
+              <BiDotsVerticalRounded
                 className="button-icon"
                 onClick={() => setMoreOpen(!moreOpen)}
               />
               {moreOpen && (
                 <ul className="dropdown">
                   <li onClick={handleArchive}>
-                    <FiArchive /> Lưu trữ
+                    <BiArchiveIn /> Lưu trữ
                   </li>
                   <li onClick={handleDelete}>
-                    <FiTrash /> Xóa
+                    <BiTrashAlt /> Xóa
                   </li>
                 </ul>
               )}
@@ -311,7 +324,7 @@ function TaskForm({ task = {} }) {
         <div className="row">
           <div className="project">
             <label>
-              <FiBook className="icon" />
+              <BiBook className="icon" />
             </label>
             <select
               name="PROJECT_ID"
@@ -326,7 +339,7 @@ function TaskForm({ task = {} }) {
               ))}
             </select>
             <label>
-              <FiTrello className="icon" />
+              <BiColumns className="icon" />
             </label>
             {formData.PROJECT_ID && (
               <select
@@ -343,32 +356,34 @@ function TaskForm({ task = {} }) {
               </select>
             )}
           </div>
-          <label>
-            <FiUser className="icon" />
-          </label>
-          {formData.PROJECT_ID ? (
-            <select
-              className="assignee"
-              name="PERFORMER_ID"
-              value={formData.PERFORMER_ID || ""}
-              onChange={handleChange}
-            >
-              <option value="">-- Chọn người --</option>
-              {performers.map((p) => (
-                <option key={p.ID} value={p.ID}>
-                  {p.username}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <p>{user.username}</p>
-          )}
+          <div className="assignee">
+            <label>
+              <BiUser className="icon" />
+            </label>
+            {formData.PROJECT_ID ? (
+              <select
+                className="assignee"
+                name="PERFORMER_ID"
+                value={formData.PERFORMER_ID || ""}
+                onChange={handleChange}
+              >
+                <option value="">-- Chọn người --</option>
+                {performers.map((p) => (
+                  <option key={p.ID} value={p.ID}>
+                    {p.username}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p>{user.username}</p>
+            )}
+          </div>
         </div>
 
         <div className="row" style={{ margin: "12px 0" }}>
           <div className="task-dates">
             <label>
-              <FiClock className="icon" />
+              <BiTime className="icon" />
             </label>
             <input
               type="date"
@@ -377,7 +392,7 @@ function TaskForm({ task = {} }) {
               onChange={handleChange}
             />
             <label>
-              <FiArrowRight className="icon" />
+              <BiRightArrowAlt className="icon" />
             </label>
             <input
               type="date"
@@ -412,7 +427,7 @@ function TaskForm({ task = {} }) {
         <div className="task-description">
           <div className="description-title">
             <label>
-              <FiAlignLeft className="icon" />
+              <BiDetail className="icon" />
             </label>
             <span>Mô tả</span>
           </div>
@@ -426,7 +441,7 @@ function TaskForm({ task = {} }) {
 
         <div className="chat-title">
           <label>
-            <FiMessageSquare className="icon" />
+            <BiMessage className="icon" />
           </label>
           <span>Trò chuyện</span>
         </div>
@@ -455,7 +470,7 @@ function TaskForm({ task = {} }) {
             type="button"
             onClick={handleAddComment}
           >
-            <FiSend className="button-icon" />
+            <BiPaperPlane className="button-icon" />
           </button>
         </div>
       </div>
@@ -468,7 +483,7 @@ function TaskForm({ task = {} }) {
         <div className="additional-info">
           {/* Attachment */}
           <div className="attachment-pill">
-            <FiPaperclip className="icon" />
+            <BiPaperclip className="icon" />
             {attachedFiles.length > 0 && (
               <>
                 <span className="file-count">{attachedFiles.length}</span>
@@ -482,7 +497,7 @@ function TaskForm({ task = {} }) {
                       rel="noopener noreferrer"
                       className="file-item"
                     >
-                      <FiFile />
+                      <BiFile />
                       <button
                         className="remove-btn"
                         type="button"
@@ -498,7 +513,7 @@ function TaskForm({ task = {} }) {
               </>
             )}
             <label htmlFor="file-upload" className="file-add-btn">
-              <FiPlus className="button-icon" />
+              <BiPlus className="button-icon" />
             </label>
             <input
               id="file-upload"

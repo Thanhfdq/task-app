@@ -7,13 +7,13 @@ import TimelineView from './TimeLineView';
 import Drawer from '../components/Drawer';
 import ProjectForm from '../components/ProjectForm.jsx';
 import '../styles/ProjectDetailPage.css';
-import { MdViewKanban, MdCalendarMonth, MdTimeline } from 'react-icons/md';
+import { BiBook ,BiColumns, BiCalendar, BiPoll, BiInfoCircle, BiArchive } from "react-icons/bi";
 import ArchivedTasksPanel from '../components/ArchivedTasksPanel.jsx';
 
 const TABS = [
-  { label: 'Xem trên bảng', icon: <MdViewKanban size={20} style={{ verticalAlign: 'middle' }} /> },
-  { label: 'Xem trên lịch', icon: <MdCalendarMonth size={20} style={{ verticalAlign: 'middle' }} /> },
-  { label: 'Dòng thời gian', icon: <MdTimeline size={20} style={{ verticalAlign: 'middle' }} /> }
+  { label: 'Xem trên bảng', icon: <BiColumns size={20} style={{ verticalAlign: 'middle' }} /> },
+  { label: 'Xem trên lịch', icon: <BiCalendar size={20} style={{ verticalAlign: 'middle' }} /> },
+  { label: 'Dòng thời gian', icon: <BiPoll size={20} style={{ verticalAlign: 'middle' }} /> }
 ];
 
 export default function ProjectDetailPage() {
@@ -56,10 +56,10 @@ export default function ProjectDetailPage() {
   return (
     <div className="project-detail-page">
       <div className="project-header">
-        <h3>{project.project_name}</h3>
+        <h2><BiBook/> {project.project_name}</h2>
         <section className="project-info">
-          <button onClick={() => openEditDrawer(project)} className="btn-secondary">Thông tin</button>
-          <button onClick={() => setShowArchivedTasksPanel(true)} className="btn-secondary">Danh sách lưu trữ</button>
+          <button onClick={() => openEditDrawer(project)} className="btn-secondary"><BiInfoCircle size={20}/>Thông tin</button>
+          <button onClick={() => setShowArchivedTasksPanel(true)} className="btn-secondary"><BiArchive size={20}/>Công việc lưu trữ</button>
         </section>
       </div>
 

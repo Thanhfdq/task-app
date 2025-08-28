@@ -152,6 +152,8 @@ export default function CalendarView({ project }) {
             <FullCalendar
                 plugins={[dayGridPlugin, interactionPlugin]}
                 initialView="dayGridMonth"
+                contentHeight="100%"
+                expandRows={true}
                 locale={viLocale}
                 events={fetchEvents}
                 eventContent={renderEventContent}

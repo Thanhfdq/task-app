@@ -1,15 +1,21 @@
 .project-detail-page {
   height: 100vh;
+  background-color: #efefef;
 }
 
 /* ==== Project Header ==== */
 .project-header {
   display: flex;
-  padding: 0 20px;
+  padding: 0 10px;
   justify-content: space-between;
   height: 50px;
   align-items: center;
-  border-bottom: 2px solid #ccc;
+}
+
+.project-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .project-info {
@@ -20,7 +26,6 @@
 .project-meta {
   font-size: 15px;
   color: #555;
-  margin-bottom: 12px;
 }
 
 .project-tags {
@@ -41,19 +46,20 @@
 .project-tabs {
   display: flex;
   height: 50px;
-  gap: 32px;
   align-items: center;
   font-size: 16px;
   font-weight: 500;
-  padding-left: 20px;
-  border-bottom: 2px solid #ccc;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .project-tab {
+  display: flex;
+  align-items: center;
   cursor: pointer;
-  padding-bottom: 10px;
   position: relative;
   color: #555;
+  height: 100%;
+  padding: 0 20px;
   transition: color 0.2s;
 }
 
@@ -79,6 +85,7 @@
 
 /* ==== View Container ==== */
 .project-view-container {
-  height: calc(100% - 104px);
+  height: calc(100% - 100px);
   overflow: auto;
+  background-color: white;
 }

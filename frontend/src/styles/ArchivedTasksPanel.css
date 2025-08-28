@@ -9,24 +9,15 @@
 }
 
 .archived-panel {
-    background: white;
-    padding: 20px;
-    width: 60%;
-    max-height: 90vh;
-    overflow-y: auto;
-    border-radius: 12px;
     position: relative;
 }
-/* 
-.close-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    border: none;
-    background: transparent;
-    font-size: 1.5rem;
-    cursor: pointer;
-} */
+
+.archived-list {
+    width: 700px;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+}
 
 .search-bar {
     margin: 10px 0;

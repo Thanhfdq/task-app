@@ -6,16 +6,17 @@ import AccountInfoForm from "./AccountInfoForm";
 import ChangePassword from "./ChangePassword.jsx";
 import axios from "../services/api";
 import {
-  FiCheckSquare,
-  FiBook,
-  FiUser,
-  FiUserCheck,
-  FiPlus,
-  FiLogOut,
-  FiSidebar,
-  FiLock,
-  FiRefreshCcw
-} from "react-icons/fi";
+  BiTask,
+  BiBookBookmark,
+  BiUserCheck,
+  BiUserCircle,
+  BiUserPin,
+  BiPlus,
+  BiLogOut,
+  BiDockLeft,
+  BiLockAlt,
+  BiRefresh,
+} from "react-icons/bi";
 import "../styles/Sidebar.css";
 
 export default function Sidebar() {
@@ -58,7 +59,7 @@ export default function Sidebar() {
     <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
       <div className="sidebar-header">
         <button className="toggle-button" onClick={toggleSidebar}>
-          <FiSidebar />
+          <BiDockLeft style={{fontSize:"20px"}}/>
         </button>
       </div>
 
@@ -114,22 +115,22 @@ export default function Sidebar() {
             })
           }
         >
-          <FiPlus />
+          <BiPlus  style={{fontSize:"20px"}}/>
           {!collapsed && <span>Tạo công việc mới</span>}
         </button>
         <Link to="/projects" className="nav-item">
-          <FiBook />
+          <BiBookBookmark  style={{fontSize:"20px"}}/>
           {!collapsed && <span>Tất cả danh sách</span>}
         </Link>
         <Link to="/tasks" className="nav-item">
-          <FiCheckSquare />
+          <BiTask  style={{fontSize:"20px"}}/>
           {!collapsed && <span>Tất cả công việc</span>}
         </Link>
       </nav>
 
       <div className="sidebar-actions">
-        <Link to="/tasks/my-tasks" className="btn-secondary nav-item">
-          <FiUserCheck />
+        <Link to="/tasks/my-tasks" className="nav-item">
+          <BiUserCheck  style={{fontSize:"20px"}}/>
           {!collapsed && <span>Công việc của tôi</span>}
         </Link>
       </div>
@@ -142,7 +143,7 @@ export default function Sidebar() {
               className="btn-secondary"
               onClick={() => reloadSideBarList()}
             >
-              <FiRefreshCcw />
+              <BiRefresh  style={{fontSize:"20px"}}/>
             </button>
           </span>
           <ul className="sidebar-list-items">
@@ -162,18 +163,18 @@ export default function Sidebar() {
           onClick={() => setMenuOpen(!menuOpen)}
           ref={menuRef}
         >
-          <FiUser />
+          <BiUserCircle  style={{fontSize:"20px"}}/>
           {!collapsed && <span>{user.fullname}</span>}
           {menuOpen && (
             <ul className="dropdown">
               <li onClick={() => setShowAccountForm(true)}>
-                <FiUser /> Hồ sơ
+                <BiUserPin  style={{fontSize:"20px"}}/> Hồ sơ
               </li>
               <li onClick={() => setShowChangePassword(true)}>
-                <FiLock /> Đổi mật khẩu
+                <BiLockAlt  style={{fontSize:"20px"}}/> Đổi mật khẩu
               </li>
               <li onClick={logout}>
-                <FiLogOut /> Đăng xuất
+                <BiLogOut  style={{fontSize:"20px"}}/> Đăng xuất
               </li>
             </ul>
           )}

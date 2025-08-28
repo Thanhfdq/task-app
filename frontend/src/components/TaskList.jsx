@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import '../styles/TaskList.css';
 import TaskItem from '../components/TaskItem.jsx';
+import {BiSort,BiCalendar, BiAt} from 'react-icons/bi';
 
 function TaskList({ tasks }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -48,10 +49,10 @@ function TaskList({ tasks }) {
       <div className="sort-bar">
         <span>Sắp xếp theo: </span>
         <button onClick={() => changeSort('task_name')}>
-          Tên công việc {sortField === 'task_name' && (sortOrder === 'asc' ? '↑' : '↓')}
+          <BiAt/>Tên công việc {sortField === 'task_name' && (sortOrder === 'asc' ? '↑' : '↓')}
         </button>
         <button onClick={() => changeSort('complete_date')}>
-          Ngày đến hạn {sortField === 'complete_date' && (sortOrder === 'asc' ? '↑' : '↓')}
+          <BiCalendar/>Ngày đến hạn {sortField === 'complete_date' && (sortOrder === 'asc' ? '↑' : '↓')}
         </button>
       </div>
 

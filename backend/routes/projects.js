@@ -187,12 +187,14 @@ router.get('/:projectId/tasks/archived', async (req, res) => {
     const [tasks] = await db.query(
       `SELECT 
          Tasks.*,
+         Projects.project_name,
          DATE_FORMAT(Tasks.start_date, '%Y-%m-%d') AS start_date,
          DATE_FORMAT(Tasks.end_date, '%Y-%m-%d') AS end_date,
          DATE_FORMAT(Tasks.complete_date, '%Y-%m-%d') AS complete_date,
          Users.username AS performer_username 
        FROM Tasks 
        LEFT JOIN Users ON Tasks.PERFORMER_ID = Users.ID
+       LEFT JOIN Projects ON Tasks.PROJECT_ID = Projects.ID
        WHERE Tasks.PROJECT_ID = ? AND Tasks.is_archive = 1`,
       [projectId]
     );
@@ -398,7 +400,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// GET /projects/archived
+// GET /projects/archived - Get all archived projects of the logged-in user
 router.get('/archived', async (req, res) => {
   const userId = req.session.userId;
   if (!userId) return res.status(401).json({ message: 'Not authenticated' });

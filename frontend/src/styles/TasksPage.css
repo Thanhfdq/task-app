@@ -1,7 +1,12 @@
 .tasks-page {
   padding: 20px;
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
+}
+
+.tasks-page h2 {
+  justify-content: center;
+  display: flex;
 }
 
 .task-toolbar {

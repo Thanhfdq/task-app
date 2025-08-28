@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import '../styles/AccountInfoForm.css';
+import { BiX } from "react-icons/bi";
 
 function ChangePassword({ error, setError, onSave, onClose }) {
     const [formData, setFormData] = useState({
@@ -34,7 +35,7 @@ function ChangePassword({ error, setError, onSave, onClose }) {
                 className="account-info-form"
                 onSubmit={handleSubmit}
             >
-                <button onClick={onClose} className="close-btn">✖</button>
+                <button onClick={onClose} className="close-btn"><BiX size={24} /></button>
                 <h2>Đổi mật khẩu</h2>
 
                 <div className="form-group">

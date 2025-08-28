@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import '../styles/AccountInfoForm.css';
+import { BiX } from "react-icons/bi";
 
 function AccountInfoForm({ user, onSave, onClose }) {
     const [formData, setFormData] = useState({
@@ -21,7 +22,7 @@ function AccountInfoForm({ user, onSave, onClose }) {
     return (
         <div className="archived-panel-overlay">
             <form className="account-info-form" onSubmit={handleSubmit}>
-                <button onClick={onClose} className="close-btn">✖</button>
+                <button onClick={onClose} className="close-btn"><BiX size={24} /></button>
                 <h2>Thông tin tài khoản</h2>
 
                 <div className="form-group">

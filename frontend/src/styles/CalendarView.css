@@ -1,3 +1,7 @@
+.calendar-view {
+  height: 100%;
+}
+
 .fc .fc-event {
   border-color: rgb(219, 219, 219);
   border-radius: 5px;
@@ -11,4 +15,8 @@
 
 .fc .fc-daygrid-event-dot {
   display: none;
+}
+
+.fc {
+  height: 100% !important;
 }

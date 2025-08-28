@@ -110,7 +110,7 @@ export default function TimelineView({ project }) {
   }
 
   function handleEventColor(info) {
-    const { task_state, start_date, end_date, label } = info.event.extendedProps;
+    const { task_state, start_date, end_date} = info.event.extendedProps;
 
     const today = new Date().toISOString().split('T')[0];
     const due = end_date || start_date;
@@ -231,20 +231,6 @@ export default function TimelineView({ project }) {
             cellContent: (args) => {
               const task = args.resource?.extendedProps?.task;
               return task !== null ? task?.end_date : '';
-            }
-          },
-          {
-            headerContent: 'Nhãn',
-            field: 'label',
-            cellContent: (args) => {
-              const task = args.resource?.extendedProps?.task;
-              return task !== null ?
-                task?.label.split(",").map((label) => (
-                  <span key={label} className="label-pill">
-                    {label}
-                  </span>
-                ))
-                : '';
             }
           },
           {
