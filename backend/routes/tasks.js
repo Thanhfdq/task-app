@@ -11,7 +11,7 @@ const __dirname = path.resolve(__filename, '..', '..'); // Go up two levels to r
 
 const router = express.Router();
 
-// GET tasks for search by logged-in user
+// GET /tasks tasks for search by logged-in user
 router.get('/', async (req, res) => {
   const userId = req.session.userId;
   if (!userId) return res.status(401).json({ message: 'Not authenticated' });
@@ -66,8 +66,8 @@ router.get('/', async (req, res) => {
     }
 
     if (keyword) {
-      sql += ` AND (task_name LIKE ? OR task_description LIKE ?)`;
-      params.push(`%${keyword}%`, `%${keyword}%`);
+      sql += ` AND (task_name LIKE ? OR task_description LIKE ? OR Users.username LIKE ?)`;
+      params.push(`%${keyword}%`, `%${keyword}%`, `%${keyword}%`);
     }
 
     if (labels) {
@@ -85,7 +85,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Toggle state of a task
+// PATCH /tasks/:id/toogle-state Toggle state of a task
 router.patch('/:id/toggle-state', async (req, res) => {
   const userId = req.session.userId;
   if (!userId) return res.status(401).json({ message: 'Not authenticated' });
@@ -113,7 +113,7 @@ router.patch('/:id/toggle-state', async (req, res) => {
   }
 });
 
-// Create a task
+// POST /tasks Create a task
 router.post('/', async (req, res) => {
   const userId = req.session.userId;
   if (!userId) return res.status(401).json({ message: 'Not authenticated' });
@@ -143,7 +143,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Update info a task
+// PUT /tasks/:id Update info a task
 router.put('/:id', async (req, res) => {
   const userId = req.session.userId;
   if (!userId) return res.status(401).json({ message: 'Not authenticated' });
@@ -181,7 +181,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Archive a task
+// PATCH /tasks/:id/archive Archive a task
 router.patch('/:id/archive', async (req, res) => {
   const userId = req.session.userId;
   if (!userId) return res.status(401).json({ message: 'Not authenticated' });
@@ -211,7 +211,7 @@ router.patch('/:id/restore', async (req, res) => {
   }
 });
 
-// Delete a task
+// DELETE /tasks/:id Delete a task
 router.delete('/:id', async (req, res) => {
   const userId = req.session.userId;
   if (!userId) return res.status(401).json({ message: 'Not authenticated' });
@@ -277,7 +277,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// POST /upload-files/:taskId
+// POST /tasks/upload-files/:taskId
 router.post('/upload-files/:taskId', upload.array('files'), async (req, res) => {
   const taskId = req.params.taskId;
   console.log("Files received for task upload:", req.files);
