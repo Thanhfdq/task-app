@@ -7,7 +7,6 @@ import {BiX} from "react-icons/bi";
 function TaskModal() {
   const { showTaskModal, closeModal, selectedTask } = useTaskModal();
   if (!showTaskModal) return null;
-  console.log(selectedTask);
 
   return (
     <div className="modal-overlay">

@@ -15,7 +15,6 @@ export const TaskModalProvider = ({ children }) => {
   const openModalForEditTask = (task) => {
     setSelectedTask(task);
     setShowModal(true);
-    console.log("open project id: " + task.PROJECT_ID);
   };
 
   const closeModal = () => {

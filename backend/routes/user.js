@@ -57,7 +57,6 @@ router.post('/change-password', async (req, res) => {
   if (!userId || !currentPassword || !newPassword) {
     return res.status(400).json({ message: 'Missing fields' });
   }
-  console.log('Change password request:', { userId, currentPassword, newPassword });
 
   try {
     // Verify current password

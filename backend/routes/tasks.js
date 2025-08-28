@@ -280,9 +280,7 @@ const upload = multer({ storage });
 // POST /tasks/upload-files/:taskId
 router.post('/upload-files/:taskId', upload.array('files'), async (req, res) => {
   const taskId = req.params.taskId;
-  console.log("Files received for task upload:", req.files);
   const files = req.files || (req.files ? [req.files] : []);
-  console.log(`Uploading files for task ${taskId}:`, files);
 
   if (files.length === 0) {
     return res.status(400).json({ error: "No files uploaded." });
@@ -345,7 +343,6 @@ router.get('/files/:fileId/download', async (req, res) => {
 
     // file_path in DB should be relative to backend, e.g. "uploads/tasks/1/xxx.jpg"
     const filePath = path.resolve(__dirname, fileRow.file_path);
-    console.log(`File path to download: ${filePath}`);
     // Security check: enforce that filePath is inside uploads directory
     const uploadsDir = path.resolve(__dirname, 'uploads');
 
@@ -373,11 +370,9 @@ router.get('/files/:fileId/download', async (req, res) => {
 // DELETE /tasks/files/:taskId/:fileName
 router.delete('/files/:taskId/:fileName', async (req, res) => {
   const { taskId, fileName } = req.params;
-  console.log(`Deleting file ${fileName} for task ${taskId}`);
   try {
     // 1️⃣ Path to file on server
     const filePath = path.join(__dirname, 'uploads', 'tasks', taskId, fileName);
-    console.log(`File path: ${filePath}`);
     // 2️⃣ Delete from server
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);

@@ -162,11 +162,8 @@ export default function TimelineView({ project }) {
               const task = args.resource?.extendedProps?.task;
               const isAddButton = args.resource?.extendedProps?.isAddButton;
               const groupId = args.resource?.extendedProps?.groupId;
-
-              console.log("isAddButton:", isAddButton, "Group ID:", groupId);
               if (isAddButton) {
                 return (
-                  console.log("Add button clicked for group:", groupId),
                   <button className="add-card"
                     onClick={(e) => {
                       e.stopPropagation();

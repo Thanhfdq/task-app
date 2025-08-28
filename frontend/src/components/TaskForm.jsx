@@ -90,19 +90,14 @@ function TaskForm({ task = {} }) {
 
   const handleSendComment = () => {
     if (!newComment.trim()) return;
-    console.log("New comment:", newComment);
     setNewComment("");
   };
 
   const getAttachedFiles = async () => {
-    console.log("Fetching attached files for task ID:", formData.ID);
     if (formData.ID) {
       try {
         await axios.get(`/tasks/${formData.ID}/files`).then((res) => {
           setAttachedFiles(res.data.files || []);
-
-          console.log("Attached files:", res.data);
-          console.log("Attached files state updated:", attachedFiles);
         });
       } catch (error) {
         console.error("Error fetching attached files:", error);
@@ -114,7 +109,6 @@ function TaskForm({ task = {} }) {
     getAttachedFiles();
   }, [formData.ID]);
   useEffect(() => {
-    console.log("Attached files state updated:", attachedFiles);
   }, [attachedFiles]);
 
   const handleFileChange = async (e) => {
@@ -135,7 +129,6 @@ function TaskForm({ task = {} }) {
     );
 
     if (res.status === 200) {
-      console.log("Files uploaded successfully");
       getAttachedFiles();
     } else {
       console.error("Upload failed");
@@ -185,7 +178,6 @@ function TaskForm({ task = {} }) {
   }, []);
 
   useEffect(() => {
-    console.log("Have Project id? " + formData.PROJECT_ID);
     if (formData.PROJECT_ID) {
       axios
         .get(`/projects/${formData.PROJECT_ID}/members`)
@@ -196,7 +188,6 @@ function TaskForm({ task = {} }) {
       axios
         .get(`/projects/${formData.PROJECT_ID}`)
         .then((res) => setProjectManagerId(res.data.manager_id));
-      console.log("Project manager ID: " + projectManagerId);
     }
   }, [formData.PROJECT_ID]);
 
@@ -205,10 +196,6 @@ function TaskForm({ task = {} }) {
       axios
         .get(`/tasks/${formData.ID}/comments`)
         .then((res) => setComments(res.data));
-      console.log(
-        "List of comments for task ID " + formData.ID + ": ",
-        comments
-      );
     }
   }, [formData.ID]);
 
@@ -272,7 +259,6 @@ function TaskForm({ task = {} }) {
   };
 
   function formatDateForInput(dateString) {
-    console.log("Date string: " + dateString?.substring(0, 10) || "");
     return dateString?.substring(0, 10) || "";
   }
 

@@ -105,7 +105,6 @@ export default function CalendarView({ project }) {
 
     const handleEventClick = (info) => {
         const task = info.event.extendedProps;
-        console.log("Startday" + task.start_date + " Endday: " + task.end_date);
         openModalForEditTask({ ...task, project_name: project.project_name });
     };
 
@@ -125,8 +124,6 @@ export default function CalendarView({ project }) {
                 end_date: end ? subtractOneDay(formatDate(end)) : null,
             });
             info.view.calendar.refetchEvents();
-            console.log("Startday" + start + " Endday: " + end);
-            console.log("Startday" + start?.toISOString().split('T')[0] + " Endday: " + end?.toISOString().split('T')[0]);
         } catch (err) {
             console.error('Failed to update task date:', err);
             info.revert();

@@ -42,7 +42,6 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
         project_state: project.project_state || false,
       });
     }
-    console.log("ProjectForm initialized with project:", project);
   }, [project]);
 
   const handleChange = (e) => {
@@ -67,7 +66,6 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
         ? format(new Date(formData.complete_date), "yyyy-MM-dd")
         : null,
     };
-    console.log("📝 Project form data:", cleanFormData);
     try {
       if (project) {
         await axios.put(`/projects/${project.ID}`, cleanFormData);

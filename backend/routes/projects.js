@@ -136,7 +136,6 @@ router.get('/owner/:userId', async (req, res) => {
       `;
   const params = [userId];
   if (typeof isArchived !== 'undefined') {
-    console.log('isArchived:', isArchived);
     sql += ` AND p.is_archive = ?`;
     params.push(isArchived);
   }

@@ -71,7 +71,6 @@ export default function Sidebar() {
             axios
               .put(`/users/${user.id}`, updatedUser)
               .then((response) => {
-                console.log("User updated:", response.data);
                 // Optionally update user context or state here
               })
               .catch((error) => {

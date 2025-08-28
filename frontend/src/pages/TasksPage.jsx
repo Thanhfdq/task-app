@@ -26,13 +26,10 @@ function TasksPage({ user, onlyMine = false }) {
         try {
             const params = {
                 keyword,
-                labels: labels.join(','),
                 ...(onlyMine ? { assigneeId: user.id } : {})
             };
 
             const res = await axios.get('/tasks', { params });
-            console.log("parameters for fetching tasks:", params);
-            console.log("Fetched tasks:", res.data);
             setTasks(res.data);
         } catch (err) {
             console.error("Lỗi khi tải công việc:", err);
