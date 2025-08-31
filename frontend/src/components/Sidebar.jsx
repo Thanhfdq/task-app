@@ -6,6 +6,7 @@ import AccountInfoForm from "./AccountInfoForm";
 import ChangePassword from "./ChangePassword.jsx";
 import axios from "../services/api";
 import {
+  BiChart,
   BiTask,
   BiBookBookmark,
   BiUserCheck,
@@ -117,6 +118,10 @@ export default function Sidebar() {
           <BiPlus  style={{fontSize:"20px"}}/>
           {!collapsed && <span>Tạo công việc mới</span>}
         </button>
+        <Link to="/report" className="nav-item">
+          <BiChart  style={{fontSize:"20px"}}/>
+          {!collapsed && <span>Báo cáo chung</span>}
+        </Link>
         <Link to="/projects" className="nav-item">
           <BiBookBookmark  style={{fontSize:"20px"}}/>
           {!collapsed && <span>Tất cả danh sách</span>}

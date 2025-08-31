@@ -1,0 +1,31 @@
+.report-page {
+  padding: 24px;
+}
+
+.report-cards {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.card {
+  flex: 1;
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.chart-box {
+  background: #fff;
+  padding: 16px;
+  border-radius: 8px;
+}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar.jsx';
 import { Routes, Route } from 'react-router-dom';
+import ReportPage from './ReportPage.jsx';
 import TasksPage from './TasksPage.jsx';
 import ProjectsPage from './ProjectsPage.jsx';
 import ProjectDetailPage from './ProjectDetailPage.jsx';
@@ -15,6 +16,7 @@ export default function MainPage({ user }) {
       <div className="main">
         <main className="content">
           <Routes>
+            <Route path="/report" element={<ReportPage user={user} />} />
             <Route path="/tasks" element={<TasksPage user={user} />} />
             <Route path="/projects" element={<ProjectsPage user={user} />} />
             <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
