@@ -4,7 +4,7 @@ import axios from "../services/api";
 import "../styles/ProjectsPage.css";
 import Drawer from "../components/Drawer";
 import ProjectForm from "../components/ProjectForm.jsx";
-import { BiBook,BiSort, BiCalendar, BiAt, BiEdit, BiPlus } from "react-icons/bi";
+import { BiSolidBookBookmark, BiBook,BiSort, BiCalendar, BiAt, BiEdit, BiPlus } from "react-icons/bi";
 
 function ProjectsPage({ user }) {
   const [showDrawer, setShowDrawer] = useState(false);
@@ -77,7 +77,7 @@ function ProjectsPage({ user }) {
 
   return (
     <div className="projects-page">
-      <h2>Tất cả danh sách</h2>
+      <h2><BiSolidBookBookmark size={30}/>Tất cả danh sách</h2>
 
       <div className="projects-controls">
         <input

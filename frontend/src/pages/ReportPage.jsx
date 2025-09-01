@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "../services/api";
 import "../styles/ReportPage.css";
+import { BiSolidChart } from "react-icons/bi";
 import { Pie, Bar, Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -16,26 +17,35 @@ import {
 } from "chart.js";
 
 ChartJS.register(
-  ArcElement, Tooltip, Legend, Title,
-  CategoryScale, LinearScale, BarElement,
-  PointElement, LineElement
+  ArcElement,
+  Tooltip,
+  Legend,
+  Title,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  PointElement,
+  LineElement
 );
 
 export default function ReportPage({ user }) {
-
   const [stats, setStats] = useState({});
   const [tasksByProject, setTasksByProject] = useState([]);
   const [completionTrend, setCompletionTrend] = useState([]);
 
   useEffect(() => {
-    axios.get("/reports/overview").then(res => setStats(res.data));
-    axios.get("/reports/tasks-by-project").then(res => setTasksByProject(res.data));
-    axios.get("/reports/completion-trend").then(res => setCompletionTrend(res.data));
+    axios.get("/reports/overview").then((res) => setStats(res.data));
+    axios
+      .get("/reports/tasks-by-project")
+      .then((res) => setTasksByProject(res.data));
+    axios
+      .get("/reports/completion-trend")
+      .then((res) => setCompletionTrend(res.data));
   }, []);
 
   return (
     <div className="report-page">
-      <h2>📈 Báo cáo & Thống kê</h2>
+      <h2><BiSolidChart size={30}/> Báo cáo & Thống kê</h2>
 
       {/* Cards */}
       <div className="report-cards">

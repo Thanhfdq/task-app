@@ -4,7 +4,7 @@ import { useTaskModal } from '../contexts/TaskModalContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import TaskList from '../components/TaskList';
 import '../styles/TasksPage.css';
-import { BiCheckSquare} from 'react-icons/bi';
+import { BiTask} from 'react-icons/bi';
 
 function TasksPage({ user, onlyMine = false }) {
     const { taskRefreshToken, openModalForNewTask } = useTaskModal();
@@ -38,7 +38,7 @@ function TasksPage({ user, onlyMine = false }) {
 
     return (
         <div className="tasks-page">
-            <h2><BiCheckSquare size={30}/> Tất cả công việc</h2>
+            <h2><BiTask size={30}/> Tất cả công việc</h2>
             <div className="task-toolbar">
                 <div className="task-toolbar-filters">
                     <input
