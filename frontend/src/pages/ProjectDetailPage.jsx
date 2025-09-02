@@ -1,19 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from '../services/api';
-import KanbanView from './KanbanView';
-import CalendarView from './CalendarView';
-import TimelineView from './TimeLineView';
-import Drawer from '../components/Drawer';
-import ProjectForm from '../components/ProjectForm.jsx';
-import '../styles/ProjectDetailPage.css';
-import { BiBook ,BiColumns, BiCalendar, BiPoll, BiInfoCircle, BiArchive } from "react-icons/bi";
-import ArchivedTasksPanel from '../components/ArchivedTasksPanel.jsx';
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import axios from "../services/api";
+import KanbanView from "./KanbanView";
+import CalendarView from "./CalendarView";
+import TimelineView from "./TimeLineView";
+import Drawer from "../components/Drawer";
+import ProjectForm from "../components/ProjectForm.jsx";
+import "../styles/ProjectDetailPage.css";
+import {
+  BiBook,
+  BiColumns,
+  BiCalendar,
+  BiPoll,
+  BiInfoCircle,
+  BiArchive,
+} from "react-icons/bi";
+import ArchivedTasksPanel from "../components/ArchivedTasksPanel.jsx";
 
 const TABS = [
-  { label: 'Xem trên bảng', icon: <BiColumns size={20} style={{ verticalAlign: 'middle' }} /> },
-  { label: 'Xem trên lịch', icon: <BiCalendar size={20} style={{ verticalAlign: 'middle' }} /> },
-  { label: 'Dòng thời gian', icon: <BiPoll size={20} style={{ verticalAlign: 'middle' }} /> }
+  {
+    label: "Xem trên bảng",
+    icon: <BiColumns size={20} style={{ verticalAlign: "middle" }} />,
+  },
+  {
+    label: "Xem trên lịch",
+    icon: <BiCalendar size={20} style={{ verticalAlign: "middle" }} />,
+  },
+  {
+    label: "Dòng thời gian",
+    icon: <BiPoll size={20} style={{ verticalAlign: "middle" }} />,
+  },
 ];
 
 export default function ProjectDetailPage() {
@@ -28,19 +44,24 @@ export default function ProjectDetailPage() {
   }, [projectId]);
 
   const refetchProject = () => {
-    axios.get(`/projects/${projectId}`)
-      .then(res => setProject(res.data))
-      .catch(err => console.error('Failed to reload project', err));
-  }
+    axios
+      .get(`/projects/${projectId}`)
+      .then((res) => setProject(res.data))
+      .catch((err) => console.error("Failed to reload project", err));
+  };
 
   const [activeTab, setActiveTab] = useState(TABS[0].label);
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'Xem trên bảng': return <KanbanView project={project} />;
-      case 'Xem trên lịch': return <CalendarView project={project} />;
-      case 'Dòng thời gian': return <TimelineView project={project} />;
-      default: return null;
+      case "Xem trên bảng":
+        return <KanbanView project={project} />;
+      case "Xem trên lịch":
+        return <CalendarView project={project} />;
+      case "Dòng thời gian":
+        return <TimelineView project={project} />;
+      default:
+        return null;
     }
   };
 
@@ -51,23 +72,40 @@ export default function ProjectDetailPage() {
 
   const closeDrawer = () => setShowDrawer(false);
 
-  if (!project) return <div className="project-detail-page">Đang tải thông tin danh sách...</div>;
+  if (!project)
+    return (
+      <div className="project-detail-page">Đang tải thông tin danh sách...</div>
+    );
 
   return (
     <div className="project-detail-page">
       <div className="project-header">
-        <h2><BiBook/> {project.project_name}</h2>
+        <h2>
+          <BiBook /> {project.project_name}
+        </h2>
         <section className="project-info">
-          <button onClick={() => openEditDrawer(project)} className="btn-secondary"><BiInfoCircle size={20}/>Thông tin</button>
-          <button onClick={() => setShowArchivedTasksPanel(true)} className="btn-secondary"><BiArchive size={20}/>Công việc lưu trữ</button>
+          <button
+            onClick={() => openEditDrawer(project)}
+            className="btn-secondary"
+          >
+            <BiInfoCircle size={20} />
+            Thông tin
+          </button>
+          <button
+            onClick={() => setShowArchivedTasksPanel(true)}
+            className="btn-secondary"
+          >
+            <BiArchive size={20} />
+            Công việc lưu trữ
+          </button>
         </section>
       </div>
 
       <div className="project-tabs">
-        {TABS.map(tab => (
+        {TABS.map((tab) => (
           <div
             key={tab.label}
-            className={`project-tab ${activeTab === tab.label ? 'active' : ''}`}
+            className={`project-tab ${activeTab === tab.label ? "active" : ""}`}
             onClick={() => setActiveTab(tab.label)}
           >
             <span style={{ marginRight: 6 }}>{tab.icon}</span>
@@ -76,9 +114,7 @@ export default function ProjectDetailPage() {
         ))}
       </div>
 
-      <div className="project-view-container">
-        {renderTabContent()}
-      </div>
+      <div className="project-view-container">{renderTabContent()}</div>
       <Drawer isOpen={showDrawer} onClose={closeDrawer}>
         <ProjectForm
           project={editingProject}
