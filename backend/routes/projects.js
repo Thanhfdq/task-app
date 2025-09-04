@@ -165,7 +165,7 @@ router.get('/:projectId/tasks', async (req, res) => {
          Users.username AS performer_username 
        FROM Tasks 
        LEFT JOIN Users ON Tasks.PERFORMER_ID = Users.ID
-       WHERE Tasks.PROJECT_ID = ? AND Tasks.is_archive = 0`,
+       WHERE Tasks.PROJECT_ID = ?`,
       [projectId]
     );
 

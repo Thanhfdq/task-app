@@ -59,6 +59,7 @@ export default function TimelineView({ project }) {
   const fetchEvents = async (info, successCallback, failureCallback) => {
     try {
       const res = await axios.get(`/projects/${project.ID}/tasks`);
+      console.log("Fetched tasks:", res.data);
       const transformed = res.data
         .filter(task => {
           if (taskFilter === 'done') return task.task_state === true;
@@ -147,10 +148,6 @@ export default function TimelineView({ project }) {
         locale={viLocale}
         events={fetchEvents}
         eventClick={handleEventClick}
-        height="auto"
-        slotMinHeight={20}
-        slotMaxHeight={20}
-        expandRows={true}
         resourceAreaWidth="50%"
         eventTextColor="black"
         eventDidMount={handleEventColor}
