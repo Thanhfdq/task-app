@@ -11,8 +11,15 @@
   margin-bottom: 20px;
 }
 
+.report-page h3 {
+  margin-top: 30px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
 .report-cards {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 16px;
   margin: 32px 0;
 }
@@ -29,12 +36,52 @@
 
 .charts {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   gap: 24px;
 }
 
 .chart-box {
+  justify-content: center;
+  align-items: center;    /* center horizontally */
+  justify-content: center; /* center vertically if you set a height */
+  text-align: center; 
   background: #fff;
-  padding: 16px;
   border-radius: 8px;
+}
+
+.chart-box canvas {
+  max-height: 300px !important;
+  width: auto !important  ;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.report-table th,
+.report-table td {
+  border: 1px solid #ddd;
+  padding: 10px 14px;
+  text-align: left;
+}
+
+.report-table th {
+  background-color: #f4f6f8;
+  font-weight: bold;
+}
+
+.report-table tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.report-table tr:hover {
+  background-color: #f1f1f1;
 }

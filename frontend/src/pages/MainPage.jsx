@@ -14,7 +14,7 @@ export default function MainPage({ user }) {
       <div className="main">
         <main className="content">
           <Routes>
-            <Route path="/report" element={<ReportPage user={user} />} />
+            <Route path="/report" element={<ReportPage />} />
             <Route path="/tasks" element={<TasksPage user={user} />} />
             <Route path="/projects" element={<ProjectsPage user={user} />} />
             <Route

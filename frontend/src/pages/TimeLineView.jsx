@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import FullCalendar from '@fullcalendar/react';
-import timelinePlugin from '@fullcalendar/resource-timeline';
+import React, { useEffect, useState } from "react";
+import FullCalendar from "@fullcalendar/react";
+import timelinePlugin from "@fullcalendar/resource-timeline";
 import interactionPlugin from "@fullcalendar/interaction";
-import viLocale from '@fullcalendar/core/locales/vi';
-import axios from '../services/api';
-import '../styles/TimeLineView.css';
-import { useTaskModal } from '../contexts/TaskModalContext';
+import viLocale from "@fullcalendar/core/locales/vi";
+import axios from "../services/api";
+import "../styles/TimeLineView.css";
+import COLORS from "../constants/colors";
+import { useTaskModal } from "../contexts/TaskModalContext";
 
 export default function TimelineView({ project }) {
   const [resourceReloadKey, setResourceReloadKey] = useState(0);
   const [resources, setResources] = useState([]);
-  const [taskFilter, setTaskFilter] = useState('all'); // 'done', 'undone', 'archive', 'all'
   const { openModalForEditTask, openModalForNewTask } = useTaskModal();
 
   useEffect(() => {
@@ -22,59 +22,51 @@ export default function TimelineView({ project }) {
       const resGroups = await axios.get(`/projects/${project.ID}/groups`);
       const resTasks = await axios.get(`/projects/${project.ID}/tasks`);
 
-      const grouped = resGroups.data.map(group => {
+      const grouped = resGroups.data.map((group) => {
         const taskResources = resTasks.data
-          .filter(task => task.GROUP_ID === group.ID)
-          .map(task => ({
+          .filter((task) => task.GROUP_ID === group.ID)
+          .map((task) => ({
             id: `${task.ID}`,
             title: task.task_name,
-            extendedProps: { task }
+            extendedProps: { task },
           }));
 
         // ➕ Add button as a "fake" resource
         const addResource = {
           id: `add-${group.ID}`,
-          title: '+ Thêm công việc',
+          title: "+ Thêm công việc",
           extendedProps: {
             isAddButton: true,
-            groupId: group.ID
-          }
+            groupId: group.ID,
+          },
         };
 
         return {
           id: `group-${group.ID}`,
           title: group.group_name,
-          children: [...taskResources, addResource]
+          children: [...taskResources, addResource],
         };
       });
 
       setResources(grouped);
-
     } catch (err) {
-      console.error('Error building collapsible resources:', err);
+      console.error("Error building collapsible resources:", err);
     }
   };
 
-
-  const fetchEvents = async (info, successCallback, failureCallback) => {
+  const fetchEvents = async (info,successCallback, failureCallback) => {
     try {
       const res = await axios.get(`/projects/${project.ID}/tasks`);
       console.log("Fetched tasks:", res.data);
       const transformed = res.data
-        .filter(task => {
-          if (taskFilter === 'done') return task.task_state === true;
-          if (taskFilter === 'undone') return task.task_state === false;
-          if (taskFilter === 'archive') return task.is_archive;
-          return true;
-        })
-        .map(task => ({
+        .map((task) => ({
           id: task.ID,
           title: task.task_name,
           start: task.start_date,
           end: task.end_date ? addOneDay(task.end_date) : null,
           resourceId: `${task.ID}`,
           allDay: true,
-          extendedProps: task
+          extendedProps: task,
         }));
       successCallback(transformed);
     } catch (error) {
@@ -91,16 +83,15 @@ export default function TimelineView({ project }) {
     });
   };
 
-
   function parseLocalDate(dateStr) {
-    const [y, m, d] = dateStr.split('-').map(Number);
+    const [y, m, d] = dateStr.split("-").map(Number);
     return new Date(y, m - 1, d);
   }
 
   function formatDate(date) {
     const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
     return `${y}-${m}-${d}`;
   }
 
@@ -111,21 +102,21 @@ export default function TimelineView({ project }) {
   }
 
   function handleEventColor(info) {
-    const { task_state, start_date, end_date} = info.event.extendedProps;
+    const { task_state, start_date, end_date } = info.event.extendedProps;
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     const due = end_date || start_date;
 
-    let color = '#fff';
-    if (due < today) color = '#dc3545';
+    let color = COLORS.normal;
+    if (due < today) color = COLORS.overdue;
     else {
       const diff = (new Date(due) - new Date(today)) / (1000 * 60 * 60 * 24);
-      if (diff <= 7) color = '#ffc107';
+      if (diff <= 7) color = COLORS.nearDue;
     }
 
-    info.el.style.backgroundColor = task_state ? '#ccc' : color;
-    info.el.style.color = 'black';
-    info.el.style.border = 'none';
+    info.el.style.backgroundColor = task_state ? COLORS.done : color;
+    info.el.style.color = "black";
+    info.el.style.border = "none";
   }
 
   const handleEventClick = (info) => {
@@ -135,12 +126,6 @@ export default function TimelineView({ project }) {
 
   return (
     <div className="calendar-view">
-      <select value={taskFilter} onChange={e => setTaskFilter(e.target.value)}>
-        <option value="all">Tất cả</option>
-        <option value="undone">Chưa hoàn thành</option>
-        <option value="done">Đã hoàn thành</option>
-        <option value="archive">Đã lưu trữ</option>
-      </select>
       <FullCalendar
         plugins={[timelinePlugin, interactionPlugin]}
         initialView="resourceTimelineMonth"
@@ -153,23 +138,24 @@ export default function TimelineView({ project }) {
         eventDidMount={handleEventColor}
         resourceAreaColumns={[
           {
-            field: 'title',
-            headerContent: 'Công việc',
+            field: "title",
+            headerContent: "Công việc",
             cellContent: (args) => {
               const task = args.resource?.extendedProps?.task;
               const isAddButton = args.resource?.extendedProps?.isAddButton;
               const groupId = args.resource?.extendedProps?.groupId;
               if (isAddButton) {
                 return (
-                  <button className="add-card"
+                  <button
+                    className="add-card"
                     onClick={(e) => {
                       e.stopPropagation();
                       openModalForNewTask({
                         PROJECT_ID: project.ID,
                         GROUP_ID: groupId,
                         project_name: project.project_name,
-                        start_date: new Date().toISOString().split('T')[0],
-                        end_date: new Date().toISOString().split('T')[0]
+                        start_date: new Date().toISOString().split("T")[0],
+                        end_date: new Date().toISOString().split("T")[0],
                       });
                     }}
                   >
@@ -184,7 +170,7 @@ export default function TimelineView({ project }) {
                 e.stopPropagation();
                 try {
                   await axios.patch(`/tasks/${task.ID}/toggle-state`);
-                  setResourceReloadKey(prev => prev + 1);
+                  setResourceReloadKey((prev) => prev + 1);
                 } catch (err) {
                   console.error("Failed to toggle task", err);
                 }
@@ -196,52 +182,56 @@ export default function TimelineView({ project }) {
                     type="checkbox"
                     checked={task.task_state}
                     onChange={handleCheckboxClick}
-                    style={{ marginRight: '6px' }}
+                    style={{ marginRight: "6px" }}
                   />
                   <span
                     style={{
-                      color: task.task_state ? '#999' : 'black',
-                      textDecoration: task.task_state ? 'line-through' : 'none',
-                      fontWeight: 500
+                      color: task.task_state ? "#999" : "black",
+                      textDecoration: task.task_state ? "line-through" : "none",
+                      fontWeight: 500,
                     }}
                   >
                     {task.task_name}
                   </span>
                 </div>
               );
-            }
+            },
           },
           {
-            headerContent: 'Ngày bắt đầu',
-            field: 'start_date',
+            headerContent: "Ngày bắt đầu",
+            field: "start_date",
             cellContent: (args) => {
               const task = args.resource?.extendedProps?.task;
-              return task !== null ? task?.start_date : '';
-            }
+              return task !== null ? task?.start_date : "";
+            },
           },
           {
-            headerContent: 'Ngày kết thúc',
-            field: 'end_date',
+            headerContent: "Ngày kết thúc",
+            field: "end_date",
             cellContent: (args) => {
               const task = args.resource?.extendedProps?.task;
-              return task !== null ? task?.end_date : '';
-            }
+              return task !== null ? task?.end_date : "";
+            },
           },
           {
-            headerContent: 'Tiến độ',
-            field: 'progress',
+            headerContent: "Tiến độ",
+            field: "progress",
             cellContent: (args) => {
               const task = args.resource?.extendedProps?.task;
-              return task?.progress != null ?
+              return task?.progress != null ? (
                 <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: `${task.progress}%` }} />
+                  <div
+                    className="progress-fill"
+                    style={{ width: `${task.progress}%` }}
+                  />
                 </div>
-                : '';
-            }
-          }
+              ) : (
+                ""
+              );
+            },
+          },
         ]}
       />
-
     </div>
   );
 }

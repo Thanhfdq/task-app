@@ -6,7 +6,7 @@ import {BiSort,BiCalendar, BiAt} from 'react-icons/bi';
 
 function TaskList({ tasks }) {
   const [currentPage, setCurrentPage] = useState(1);
-  const tasksPerPage = 5;
+  const tasksPerPage = 10;
 
   const [sortField, setSortField] = useState('complete_date');
   const [sortOrder, setSortOrder] = useState('asc');
@@ -47,7 +47,7 @@ function TaskList({ tasks }) {
   return (
     <div className="task-list-container">
       <div className="sort-bar">
-        <span>Sắp xếp theo: </span>
+        <span> <BiSort/> Sắp xếp theo: </span>
         <button onClick={() => changeSort('task_name')}>
           <BiAt/>Tên công việc {sortField === 'task_name' && (sortOrder === 'asc' ? '↑' : '↓')}
         </button>

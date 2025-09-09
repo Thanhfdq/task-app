@@ -117,7 +117,7 @@ export default function Sidebar() {
           }
         >
           <BiEdit  style={{fontSize:"20px"}}/>
-          {!collapsed && <span>Tạo công việc mới</span>}
+          {!collapsed && <span>Công việc mới</span>}
         </button>
         <Link to="/report" className="nav-item">
           <BiChart  style={{fontSize:"20px"}}/>

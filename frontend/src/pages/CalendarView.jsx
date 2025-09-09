@@ -5,6 +5,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import viLocale from "@fullcalendar/core/locales/vi";
 import axios from "../services/api";
 import "../styles/CalendarView.css";
+import COLORS from "../constants/colors";
 import { useTaskModal } from "../contexts/TaskModalContext";
 
 export default function CalendarView({ project }) {
@@ -21,7 +22,6 @@ export default function CalendarView({ project }) {
         end: task.end_date ? addOneDay(task.end_date) : undefined, // FC end is exclusive
         backgroundColor: getColorByDueDate(
           task.task_state,
-          task.start_date,
           task.end_date
         ),
         allDay: true,
@@ -92,20 +92,19 @@ export default function CalendarView({ project }) {
     );
   };
 
-  const getColorByDueDate = (task_state, startDateStr, endDateStr) => {
+  const getColorByDueDate = (task_state, endDateStr) => {
     if (!task_state) {
-      const todayStr = new Date().toISOString().split("T")[0];
-      const dueStr = endDateStr || startDateStr;
-      if (!dueStr) return "#fff";
+      const todayStr = new Date().toISOString().split('T')[0];
 
-      if (dueStr < todayStr) return "#dc3545"; // ❌ overdue - red
+      if (endDateStr < todayStr) return COLORS.overdue; // ❌ overdue - red
+      
       const diffDays = Math.floor(
-        (new Date(dueStr) - new Date(todayStr)) / (1000 * 60 * 60 * 24)
+        (new Date(endDateStr) - new Date(todayStr)) / (1000 * 60 * 60 * 24)
       );
-
-      if (diffDays <= 7) return "#ffc107"; // ⚠️ due soon - yellow
+      if (diffDays <= 7) return COLORS.nearDue;
+      return COLORS.normal // ⚠️ due soon - yellow
     }
-    return "#fff"; // ✅ ok - white
+    return COLORS.done; // ✅ ok - white
   };
 
   const handleEventClick = (info) => {

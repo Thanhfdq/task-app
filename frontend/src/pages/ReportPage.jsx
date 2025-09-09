@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "../services/api";
 import "../styles/ReportPage.css";
 import { BiSolidChart } from "react-icons/bi";
@@ -28,7 +28,7 @@ ChartJS.register(
   LineElement
 );
 
-export default function ReportPage({ user }) {
+export default function ReportPage() {
   const [stats, setStats] = useState({});
   const [tasksByProject, setTasksByProject] = useState([]);
   const [completionTrend, setCompletionTrend] = useState([]);
@@ -45,7 +45,9 @@ export default function ReportPage({ user }) {
 
   return (
     <div className="report-page">
-      <h2><BiSolidChart size={30}/> Báo cáo & Thống kê</h2>
+      <h2>
+        <BiSolidChart size={30} /> Báo cáo & Thống kê
+      </h2>
 
       {/* Cards */}
       <div className="report-cards">
@@ -58,23 +60,58 @@ export default function ReportPage({ user }) {
 
       {/* Charts */}
       <div className="charts">
-        <div className="chart-box">
-          <h3>Tỷ lệ trạng thái công việc</h3>
-          <Pie
-            data={{
-              labels: ["Chưa làm", "Đang làm", "Hoàn thành"],
-              datasets: [
-                {
-                  data: [
-                    stats.openTasks || 0,
-                    stats.inProgressTasks || 0,
-                    stats.completedTasks || 0,
-                  ],
-                  backgroundColor: ["#ef476f", "#ffd166", "#06d6a0"],
-                },
-              ],
-            }}
-          />
+        <div className="chart-row">
+          <div>
+            {/* Overview Stats */}
+            <h3>Tổng quan</h3>
+            <table className="report-table">
+              <thead>
+                <tr>
+                  <th>Loại</th>
+                  <th>Tổng</th>
+                  <th>Đang hoạt động</th>
+                  <th>Lưu trữ</th>
+                  <th>Đang mở</th>
+                  <th>Hoàn thành</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Dự án quản lý</td>
+                  <td>{stats.totalProjects || 0}</td>
+                  <td>{stats.activeProjects || 0}</td>
+                  <td>{stats.archivedProjects || 0}</td>
+                  <td>-</td>
+                  <td>-</td>
+                </tr>
+                <tr>
+                  <td>Công việc được giao</td>
+                  <td>{stats.totalTasks || 0}</td>
+                  <td>{stats.openTasks || 0}</td>
+                  <td>-</td>
+                  <td>{stats.completedTasks || 0}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="chart-box">
+            <h3>Tỷ lệ trạng thái công việc</h3>
+            <Pie
+              data={{
+                labels: ["Chưa làm", "Đang làm", "Hoàn thành"],
+                datasets: [
+                  {
+                    data: [
+                      stats.openTasks || 0,
+                      stats.inProgressTasks || 0,
+                      stats.completedTasks || 0,
+                    ],
+                    backgroundColor: ["#ef476f", "#ffd166", "#06d6a0"],
+                  },
+                ],
+              }}
+            />
+          </div>
         </div>
 
         <div className="chart-box">
@@ -108,6 +145,50 @@ export default function ReportPage({ user }) {
               ],
             }}
           />
+        </div>
+      </div>
+
+      {/* Detailed Tables */}
+      <div className="chart-row">
+        <div>
+          {/* Tasks By Project */}
+          <h3>Công việc theo từng dự án</h3>
+          <table className="report-table">
+            <thead>
+              <tr>
+                <th>Dự án</th>
+                <th>Số công việc</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tasksByProject.map((p, idx) => (
+                <tr key={idx}>
+                  <td>{p.project_name}</td>
+                  <td>{p.task_count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div>
+          {/* Completion Trend */}
+          <h3>Tiến độ hoàn thành (theo ngày)</h3>
+          <table className="report-table">
+            <thead>
+              <tr>
+                <th>Ngày</th>
+                <th>Số công việc hoàn thành</th>
+              </tr>
+            </thead>
+            <tbody>
+              {completionTrend.map((d, idx) => (
+                <tr key={idx}>
+                  <td>{new Date(d.date).toLocaleDateString("vi-VN")}</td>
+                  <td>{d.completed_count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

@@ -1,0 +1,18 @@
+{
+  "bundle": {
+    "linux": {
+      "appimage": {
+        "files": {},
+        "bundleMediaFramework": false
+      },
+      "deb": {
+        "files": {}
+      },
+      "rpm": {
+        "files": {},
+        "epoch": 0,
+        "release": "1"
+      }
+    }
+  }
+}

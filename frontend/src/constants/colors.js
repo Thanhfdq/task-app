@@ -1,6 +1,7 @@
 const COLORS = {
-  overdue: "#ffd6d6",       // đỏ nhạt
-  nearDue: "#fff8c4",       // vàng nhạt
+  done: "#5bff81ff",          // xanh lá nhạt
+  overdue: "#ff8080ff",       // đỏ nhạt
+  nearDue: "#f2ff00ff",       // vàng nhạt
   normal: "#ffffff"         // nền mặc định
 };
 

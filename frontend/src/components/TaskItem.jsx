@@ -1,8 +1,8 @@
-import React from "react";
 import { useTaskModal } from "../contexts/TaskModalContext";
 import COLORS from "../constants/colors";
 import axios from "../services/api";
 import "../styles/TaskItem.css";
+import {BiBook, BiUser, BiTime} from 'react-icons/bi';
 
 function TaskItem({ task }) {
   const { openModalForEditTask, triggerTaskRefresh } = useTaskModal();
@@ -10,7 +10,7 @@ function TaskItem({ task }) {
   const dueDate = new Date(task.end_date);
   const diffTime = dueDate.getTime() - today.getTime();
 
-  let backgroundColor = COLORS.normal;
+  let backgroundColor = COLORS.done;
   let dueMessage = "";
   if (task.task_state === 0) {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -20,6 +20,8 @@ function TaskItem({ task }) {
     } else if (diffDays <= 7) {
       backgroundColor = COLORS.nearDue;
       dueMessage = `Còn ${diffDays} ngày đến hạn.`;
+    } else {
+      backgroundColor = COLORS.normal;
     }
   }
 
@@ -45,25 +47,30 @@ function TaskItem({ task }) {
           checked={task.task_state}
           onChange={() => handleToggleTaskState(task.ID)}
         />
-        <strong
+        <h2
           onClick={() => openModalForEditTask(task)}
           style={{ cursor: "pointer" }}
         >
           {task.task_name}
-        </strong>
+        </h2>
       </div>
-
 
       <div className="task-meta">
-        <span>
-          {task.performer_username} / {task.project_name}
-        </span>
-        <b>Ngày đến hạn: {formatDate(task.end_date)}</b>
-        {dueMessage && <b className="due-alert">{dueMessage}</b>}
-        <span>Người thực hiện: {task.performer_username || "Chưa gán"}</span>
+        <p>
+          <strong><BiBook/> Dự án:</strong> {task.project_name}
+        </p>
+        <p>
+          <strong><BiUser/> Người thực hiện:</strong>{" "}
+          {task.performer_username || "Chưa gán"}
+        </p>
+        <p>
+          <strong><BiTime/> Ngày đến hạn:</strong> {formatDate(task.end_date)}
+          {dueMessage && <span className="due-alert"> – {dueMessage}</span>}
+        </p>
       </div>
+
       <div className="task-progress">
-        <label>Tiến độ: {task.progress}%</label>
+        <label>📊 Tiến độ: {task.progress}%</label>
         <div className="progress-bar">
           <div
             className="progress-fill"
